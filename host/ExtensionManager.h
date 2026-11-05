@@ -35,7 +35,7 @@ public:
     // Files that aren't extensions for this host are recorded with an error, not loaded.
     void loadFromDirectory(const QString &directory);
 
-    QList<Extension> extensions() const { return m_extensions; }
+    const QList<Extension> &extensions() const { return m_extensions; }
     QList<Extension> loadedExtensions() const;
     const Extension *findById(const QString &id) const;
 

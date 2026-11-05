@@ -1,0 +1,7 @@
+{
+    "id": "org.qtplugins.hello",
+    "name": "Hello",
+    "version": "1.0.0",
+    "description": "Minimal example extension showing a label.",
+    "apiVersion": 1
+}

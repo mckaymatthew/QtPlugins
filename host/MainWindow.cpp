@@ -71,7 +71,7 @@ bool MainWindow::openExtension(const QString &id)
 void MainWindow::populateOverview()
 {
     int loaded = 0;
-    const QList<ExtensionManager::Extension> extensions = m_extensions->extensions();
+    const QList<ExtensionManager::Extension> &extensions = m_extensions->extensions();
     for (const ExtensionManager::Extension &extension : extensions) {
         auto *item = new QTreeWidgetItem(m_overview);
         item->setText(0, extension.name.isEmpty() ? QFileInfo(extension.filePath).fileName()

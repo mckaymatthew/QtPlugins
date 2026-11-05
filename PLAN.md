@@ -67,9 +67,9 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 - Commit
 
 ### Phase 2 — Plugin loading tests
-- [ ] A trivial test plugin (`plugins/hello`, plain QLabel) to prove the pipeline without 3D
-- [ ] Qt Test for `ExtensionManager`: finds/loads valid plugin, rejects non-plugin `.so`, reports errors
-- [ ] Wire into `ctest` with `QT_QPA_PLATFORM=offscreen`
+- [x] A trivial test plugin (`plugins/hello`, plain QLabel) to prove the pipeline without 3D
+- [x] Qt Test for `ExtensionManager`: finds/loads valid plugin, rejects non-plugin `.so`, reports errors
+- [x] Wire into `ctest` with `QT_QPA_PLATFORM=offscreen`
 - Commit
 
 ### Phase 3 — Tic-tac-toe game logic

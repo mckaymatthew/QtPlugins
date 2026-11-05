@@ -20,3 +20,9 @@ include(QtPluginsExtension)
 
 add_subdirectory(sdk)
 add_subdirectory(host)
+add_subdirectory(plugins)
+
+if(QTPLUGINS_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
