@@ -1,5 +1,7 @@
 #include "TypingSession.h"
 
+#include <utility>
+
 namespace {
 
 const char Code[] = "bool preflight(Algorithms &a) {\n"

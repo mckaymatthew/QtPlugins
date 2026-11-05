@@ -3,6 +3,7 @@
 #include <QRandomGenerator>
 #include <QTimer>
 
+#include <algorithm>
 #include <array>
 
 namespace {

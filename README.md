@@ -135,9 +135,8 @@ Mustard and Mayonnaise also loads JPEG photos, so the `qjpeg` image-format plugi
   `qml6-module-qtquick`, `qml6-module-qtquick-window`, `libqt6quick6` and the Mesa GL
   drivers. For a self-contained bundle, use a tool such as `linuxdeploy` with its Qt plugin
   (pass the extension `.so` files and `QML_SOURCES_PATHS=plugins/tictactoe/qml`).
-- **Windows:** run `windeployqt` on the host **and** on each extension DLL, passing
-  `--qmldir plugins/tictactoe/qml` so that it copies `QtQuick3D` and its QML imports.
-  To run tests from the build tree, Qt's `bin` directory must be on `PATH`.
+- **Windows:** `cmake --install` runs `windeployqt` for you, on the host **and** on each
+  extension with its QML directory, so `QtQuick3D` and the QML imports are included.
 - **macOS:** run `macdeployqt qtplugins-host.app -qmldir=plugins/tictactoe/qml
   -executable=qtplugins-host.app/Contents/PlugIns/extensions/libtictactoe.so`. Re-sign the bundle
   afterwards. Every extension must be signed with the same team identity as the host, or
@@ -151,4 +150,5 @@ That is convenient for local installs. For distribution, use the deployment tool
 - **Linux:** developed on headless Ubuntu 24.04 with Qt 6.4.2 from apt.
 - **macOS (Apple silicon):** not yet verified. See [docs/macos-setup.md](docs/macos-setup.md). Install Qt 6.4.x–6.5 LTS with the Qt online
   installer or `aqtinstall`. Homebrew ships a much newer Qt.
-- **Windows:** not yet verified. Use the Qt online installer with an MSVC 2019/2022 kit.
+- **Windows x64 (MSVC):** built and tested in CI on every push. See
+  [docs/windows-setup.md](docs/windows-setup.md).

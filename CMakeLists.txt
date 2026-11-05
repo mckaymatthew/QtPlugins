@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Sources are UTF-8; without this MSVC reads them in the local code page and mangles string literals.
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
 
@@ -48,3 +51,5 @@ if(QTPLUGINS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+include(QtPluginsDeploy)

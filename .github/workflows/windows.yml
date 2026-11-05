@@ -1,0 +1,74 @@
+name: Windows x64
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.5.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          modules: 'qtquick3d qtshadertools qtquicktimeline'
+          cache: true
+
+      - name: Set up MSVC (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        env:
+          # No GPU on the runner: render through Direct3D's WARP software rasterizer.
+          QSG_RHI_PREFER_SOFTWARE_RENDERER: '1'
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install and deploy
+        run: cmake --install build --prefix dist
+
+      - name: Check the deployed folder runs without Qt installed
+        shell: pwsh
+        run: |
+          foreach ($f in 'qtplugins-host.exe', 'Qt6Widgets.dll', 'Qt6Quick3D.dll',
+                         'platforms/qwindows.dll', 'imageformats/qjpeg.dll',
+                         'qml/QtQuick3D/qmldir', 'extensions/tictactoe.dll',
+                         'extensions/mustardmayo.dll', 'extensions/hello.dll') {
+            if (-not (Test-Path "dist/bin/$f")) { throw "missing from deployment: $f" }
+          }
+          # Hide the Qt installation from the deployed app.
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
+          $env:QSG_RHI_PREFER_SOFTWARE_RENDERER = '1'
+          $p = Start-Process dist/bin/qtplugins-host.exe -ArgumentList '--open', 'org.qtplugins.mustardmayo' -PassThru
+          Start-Sleep -Seconds 10
+          if ($p.HasExited) { throw "deployed host exited early with code $($p.ExitCode)" }
+          Stop-Process $p
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-screenshots
+          path: build/tests/*.png
+          if-no-files-found: ignore
+
+      - name: Upload deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: qtplugins-windows-x64
+          path: dist/bin

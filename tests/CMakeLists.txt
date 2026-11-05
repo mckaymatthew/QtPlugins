@@ -48,3 +48,10 @@ foreach(game tictactoe mustardmayo)
         add_test(NAME smoke_${game} COMMAND smoke_${game})
     endif()
 endforeach()
+
+# On Windows, tests run from the build tree need Qt's DLLs, which live next to Qt's tools in bin/.
+if(WIN32)
+    get_property(_qtplugins_tests DIRECTORY PROPERTY TESTS)
+    set_property(TEST ${_qtplugins_tests} APPEND PROPERTY ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
+endif()
