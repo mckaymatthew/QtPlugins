@@ -13,11 +13,17 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("Example host that loads extensions."));
     parser.addHelpOption();
+#ifdef Q_OS_MACOS
+    // Inside an app bundle (Contents/MacOS/<exe>) plugins conventionally live in Contents/PlugIns.
+    const QString defaultDir = QStringLiteral("../PlugIns/extensions");
+#else
+    const QString defaultDir = QStringLiteral("extensions");
+#endif
     QCommandLineOption dirOption(QStringLiteral("extensions-dir"),
                                  QStringLiteral("Directory to load extensions from."),
                                  QStringLiteral("dir"),
-                                 QDir(QApplication::applicationDirPath())
-                                     .filePath(QStringLiteral("extensions")));
+                                 QDir::cleanPath(QDir(QApplication::applicationDirPath())
+                                                     .filePath(defaultDir)));
     QCommandLineOption openOption(QStringLiteral("open"),
                                   QStringLiteral("Open the extension with this id on startup."),
                                   QStringLiteral("id"));

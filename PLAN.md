@@ -93,10 +93,10 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 - Commit
 
 ### Phase 5 — Deployment & docs
-- [ ] `install()` rules: host binary + `extensions/` layout; document `RPATH` / Qt runtime expectations
-- [ ] README: how to build a new plugin, ABI rules (same Qt/compiler/build type), how to integrate
+- [x] `install()` rules: host binary + `extensions/` layout; document `RPATH` / Qt runtime expectations
+- [x] README: how to build a new plugin, ABI rules (same Qt/compiler/build type), how to integrate
       `ExtensionManager` + `IExtension.h` into the real host
-- [ ] Notes for Windows (`windeployqt`, `.dll` suffix) and macOS (`macdeployqt`, `.dylib`, signing)
+- [x] Notes for Windows (`windeployqt`, `.dll` suffix) and macOS (`macdeployqt`, `.dylib`, signing)
 - Commit
 
 ### Phase 6 — macOS (M2) bring-up *(later, interactive)*

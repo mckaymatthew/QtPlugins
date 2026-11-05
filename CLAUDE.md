@@ -43,9 +43,16 @@ See `Project.MD` for the original brief and `PLAN.md` for the implementation pla
 scripts/setup-linux.sh                       # install toolchain + Qt 6.4.2 dev packages (apt)
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
-ctest --test-dir build --output-on-failure   # unit tests (offscreen)
-build/host/qtplugins-host --extensions-dir build/extensions
+ctest --test-dir build --output-on-failure   # unit tests (offscreen) + 3D smoke test (xvfb-run)
+build/host/qtplugins-host --extensions-dir build/extensions [--open org.qtplugins.tictactoe]
+cmake --install build --prefix <dir>         # bin/qtplugins-host + bin/extensions/*.so
 ```
+
+The smoke test saves screenshots to `build/tests/smoke-*.png` — look at them after visual changes
+to the board. Quick 3D needs OpenGL, so anything rendering must run under `xvfb-run` here.
+
+New extensions use `qtplugins_add_extension()` (`cmake/QtPluginsExtension.cmake`) and must give
+their `qt_add_resources` a unique prefix (`/qtplugins/<name>`). See README.md for details.
 
 (Update this section if the commands change.)
 

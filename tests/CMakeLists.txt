@@ -6,10 +6,12 @@ foreach(fixture wrongiid badapi)
     qt_add_plugin(fixture_${fixture} SHARED)
     target_sources(fixture_${fixture} PRIVATE fixtures/${fixture}.cpp)
     target_link_libraries(fixture_${fixture} PRIVATE QtPlugins::Sdk)
-    set_target_properties(fixture_${fixture} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${FIXTURE_DIR}")
+    set_target_properties(fixture_${fixture} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$<1:${FIXTURE_DIR}>")
 endforeach()
 add_library(fixture_notaplugin SHARED fixtures/notaplugin.cpp)
-set_target_properties(fixture_notaplugin PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${FIXTURE_DIR}")
+set_target_properties(fixture_notaplugin PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "$<1:${FIXTURE_DIR}>"
+    RUNTIME_OUTPUT_DIRECTORY "$<1:${FIXTURE_DIR}>")
 file(WRITE "${FIXTURE_DIR}/README.txt" "Not a library; must be ignored.\n")
 
 qt_add_executable(tst_extensionmanager tst_extensionmanager.cpp)

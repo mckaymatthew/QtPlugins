@@ -15,6 +15,17 @@ option(QTPLUGINS_BUILD_TESTS "Build unit tests" ON)
 #   build/host/qtplugins-host --extensions-dir build/extensions
 set(QTPLUGINS_EXTENSIONS_DIR "${CMAKE_BINARY_DIR}/extensions")
 
+# Installed layout mirrors where the host looks by default: an "extensions" directory next to the
+# executable, or Contents/PlugIns/extensions inside the macOS app bundle.
+if(APPLE)
+    set(QTPLUGINS_INSTALL_EXTENSIONSDIR "qtplugins-host.app/Contents/PlugIns/extensions")
+else()
+    set(QTPLUGINS_INSTALL_EXTENSIONSDIR "${CMAKE_INSTALL_BINDIR}/extensions")
+endif()
+
+# Keep the path to a non-system Qt (e.g. from the Qt online installer) in installed binaries.
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(QtPluginsExtension)
 
