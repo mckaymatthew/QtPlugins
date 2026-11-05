@@ -6,7 +6,7 @@ Item {
     id: scene
     focus: true
 
-    readonly property real progress: game.eatingProgress
+    readonly property int bites: game.bites
 
     Rectangle {
         anchors.fill: parent
@@ -119,11 +119,11 @@ Item {
         }
     }
 
-    // The cheeseburger arrives: a photo that slowly zooms in on the patty while you eat.
+    // The cheeseburger arrives: one photo per bite, from whole burger to empty wrapper.
     Item {
         id: closeUp
         anchors.fill: parent
-        visible: scene.progress > 0
+        visible: scene.bites > 0
         opacity: visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 400 } }
 
@@ -133,10 +133,9 @@ Item {
         }
 
         Rectangle { // photo frame
-            id: frame
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: -10
-            width: Math.min(parent.width * 0.78, (parent.height * 0.66) * photo.aspect)
+            anchors.verticalCenterOffset: -30
+            width: Math.min(parent.width * 0.86, (parent.height * 0.76) * photo.aspect)
             height: width / photo.aspect
             color: "black"
             radius: 12
@@ -148,53 +147,27 @@ Item {
                 readonly property real aspect: implicitHeight > 0 ? implicitWidth / implicitHeight : 16 / 9
                 anchors.fill: parent
                 anchors.margins: 2
-                source: "assets/burger.png"
+                source: scene.bites > 0 ? "assets/whataburger%1.jpg".arg(scene.bites - 1) : ""
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true
-                transform: Scale { // zoom towards the patty's holes as the burger disappears
-                    origin { x: photo.width * 0.42; y: photo.height * 0.58 }
-                    xScale: 1 + 1.4 * scene.progress
-                    yScale: xScale
-                }
             }
         }
     }
 
     Text {
         anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 24 }
-        text: scene.progress > 0 && scene.progress < 1 ? qsTr("One cheeseburger. Look closer.")
-            : scene.progress >= 1 ? qsTr("That hit the spot. It's 2 AM…")
-                                  : qsTr("What-A-Burger. Open 24 hours.")
+        visible: scene.bites === 0
+        text: qsTr("What-A-Burger. Open 24 hours.")
         color: "white"
         font { pixelSize: 26; bold: true }
         style: Text.Outline; styleColor: "#a0000000"
     }
 
-    Column {
+    OverlayButton {
         anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 24 }
-        spacing: 12
-
-        ProgressBar {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: scene.progress > 0 && scene.progress < 1
-            label: qsTr("Eating…")
-            value: scene.progress
-            fill: "#ff9f1c"
-        }
-        OverlayButton {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: scene.progress === 0
-            text: qsTr("Eat")
-            accent: "#a8321e"
-            onClicked: game.eat()
-        }
-        OverlayButton {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: scene.progress >= 1
-            text: qsTr("Go back to work")
-            accent: "#2f5d8f"
-            onClicked: game.backToWork()
-        }
+        text: game.finishedEating ? qsTr("Go back to work") : qsTr("Eat")
+        accent: game.finishedEating ? "#2f5d8f" : "#a8321e"
+        onClicked: game.finishedEating ? game.backToWork() : game.eat()
     }
 }

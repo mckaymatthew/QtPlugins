@@ -128,6 +128,8 @@ and never crash the host.
 The host doesn't link Qt Quick or Qt Quick 3D, but the tic-tac-toe extension does. A deployment
 therefore has to include **the Qt libraries and QML modules the extensions need**, not only the
 ones the host needs. Deployment tools that only scan the host executable will miss them.
+Mustard and Mayonnaise also loads JPEG photos, so the `qjpeg` image-format plugin must be deployed.
+`windeployqt` and `macdeployqt` include it by default.
 
 - **Linux (system Qt):** depend on the distro packages: `libqt6quick3d6`, `qml6-module-quick3d`,
   `qml6-module-qtquick`, `qml6-module-qtquick-window`, `libqt6quick6` and the Mesa GL

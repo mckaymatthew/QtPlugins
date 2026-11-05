@@ -354,7 +354,7 @@ private slots:
     void gameBurgerPathLoopsBackToWork()
     {
         MustardMayoGame game;
-        game.setEatDuration(100);
+        QSignalSpy bites(&game, &MustardMayoGame::bitesChanged);
         typeUntilUnreadable(*game.typing());
         QVERIFY(game.goHome());
         game.driving()->stop();
@@ -363,10 +363,15 @@ private slots:
         QVERIFY(game.chooseBurger());
         QCOMPARE(game.phaseName(), QStringLiteral("burger"));
 
-        QVERIFY(!game.backToWork()); // haven't eaten
-        QVERIFY(game.eat());
-        QVERIFY(!game.eat());
-        QTRY_COMPARE(game.eatingProgress(), 1.0);
+        // One click per bite; work has to wait until the last one.
+        for (int bite = 1; bite <= MustardMayoGame::biteCount(); ++bite) {
+            QVERIFY(!game.backToWork());
+            QVERIFY(game.eat());
+            QCOMPARE(game.bites(), bite);
+        }
+        QVERIFY(game.finishedEating());
+        QVERIFY(!game.eat()); // nothing left
+        QCOMPARE(bites.count(), MustardMayoGame::biteCount());
         QVERIFY(game.backToWork());
         QCOMPARE(game.phaseName(), QStringLiteral("work"));
         QCOMPARE(game.night(), 2);
@@ -374,6 +379,7 @@ private slots:
 
         game.restart();
         QCOMPARE(game.night(), 1);
+        QCOMPARE(game.bites(), 0);
     }
 };
 

@@ -148,12 +148,19 @@ private slots:
         settle();
         expectRendered("mm-burger");
 
-        m_game->setProperty("eatDuration", 2500);
-        invoke("eat");
-        QTest::qWait(1200); // close-up fades in and the burger grows into view
-        expectRendered("mm-burger-eating");
-        QTRY_COMPARE(m_game->property("eatingProgress").toReal(), 1.0);
-        invoke("backToWork");
+        // Click through the photos with the on-screen button (bottom centre).
+        const QPoint button(m_view->width() / 2, m_view->height() - 24 - 23);
+        const int biteCount = m_game->property("biteCount").toInt();
+        for (int bite = 1; bite <= biteCount; ++bite) {
+            QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button);
+            QTRY_COMPARE(m_game->property("bites").toInt(), bite);
+            if (bite == 1 || bite == 4 || bite == biteCount) {
+                settle(500);
+                expectRendered(QStringLiteral("mm-burger-bite%1").arg(bite));
+            }
+        }
+        QVERIFY(m_game->property("finishedEating").toBool());
+        QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button); // "Go back to work"
         QCOMPARE(phase(), QStringLiteral("work"));
         QCOMPARE(m_game->property("night").toInt(), 2);
     }

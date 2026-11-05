@@ -1,23 +1,11 @@
 #include "MustardMayoGame.h"
 
-namespace {
-constexpr int EatTick = 50; // ms
-}
-
 MustardMayoGame::MustardMayoGame(QObject *parent)
     : QObject(parent)
 {
     connect(&m_driving, &DrivingSession::finished, this, [this] {
         if (m_phase == Phase::Drive)
             setPhase(Phase::Destination);
-    });
-
-    m_eatTimer.setInterval(EatTick);
-    connect(&m_eatTimer, &QTimer::timeout, this, [this] {
-        m_eatElapsed += EatTick;
-        setEatingProgress(qMin(1.0, qreal(m_eatElapsed) / m_eatDuration));
-        if (m_eatingProgress >= 1.0)
-            m_eatTimer.stop();
     });
 }
 
@@ -38,15 +26,6 @@ QString MustardMayoGame::phaseName() const
         return QStringLiteral("burger");
     }
     return QString();
-}
-
-void MustardMayoGame::setEatDuration(int ms)
-{
-    ms = qMax(EatTick, ms);
-    if (m_eatDuration == ms)
-        return;
-    m_eatDuration = ms;
-    emit eatDurationChanged();
 }
 
 bool MustardMayoGame::goHome()
@@ -71,8 +50,7 @@ bool MustardMayoGame::chooseBurger()
 {
     if (m_phase != Phase::Destination)
         return false;
-    m_eatElapsed = 0;
-    setEatingProgress(0);
+    setBites(0);
     setPhase(Phase::Burger);
     return true;
 }
@@ -87,16 +65,15 @@ bool MustardMayoGame::goToBed()
 
 bool MustardMayoGame::eat()
 {
-    if (m_phase != Phase::Burger || m_eatTimer.isActive() || m_eatingProgress > 0)
+    if (m_phase != Phase::Burger || finishedEating())
         return false;
-    m_eatElapsed = 0;
-    m_eatTimer.start();
+    setBites(m_bites + 1);
     return true;
 }
 
 bool MustardMayoGame::backToWork()
 {
-    if (m_phase != Phase::Burger || m_eatingProgress < 1.0)
+    if (m_phase != Phase::Burger || !finishedEating())
         return false;
     ++m_night;
     emit nightChanged();
@@ -107,10 +84,9 @@ bool MustardMayoGame::backToWork()
 
 void MustardMayoGame::restart()
 {
-    m_eatTimer.stop();
     m_driving.reset();
     m_typing.reset();
-    setEatingProgress(0);
+    setBites(0);
     if (m_night != 1) {
         m_night = 1;
         emit nightChanged();
@@ -128,10 +104,10 @@ void MustardMayoGame::setPhase(Phase phase)
     emit phaseChanged();
 }
 
-void MustardMayoGame::setEatingProgress(qreal progress)
+void MustardMayoGame::setBites(int bites)
 {
-    if (qFuzzyCompare(m_eatingProgress + 1, progress + 1))
+    if (m_bites == bites)
         return;
-    m_eatingProgress = progress;
-    emit eatingProgressChanged();
+    m_bites = bites;
+    emit bitesChanged();
 }

@@ -28,10 +28,14 @@ qt_add_resources(mustardmayo mustardmayo_qml
         qml/HomeScene.qml
         qml/AsleepScene.qml
         qml/BurgerScene.qml)
-# Images, served as assets/* next to the QML. PNG needs no Qt image-format plugin at runtime.
+# Burger photos, one per bite, served as assets/* next to the QML. JPEG keeps the plugin small but
+# needs Qt's qjpeg image-format plugin at runtime (deployed by default by windeployqt/macdeployqt).
 qt_add_resources(mustardmayo mustardmayo_assets
     PREFIX /qtplugins/mustardmayo
-    FILES assets/burger.png)
+    FILES
+        assets/whataburger0.jpg assets/whataburger1.jpg assets/whataburger2.jpg
+        assets/whataburger3.jpg assets/whataburger4.jpg assets/whataburger5.jpg
+        assets/whataburger6.jpg)
 qt_add_shaders(mustardmayo mustardmayo_shaders
     PREFIX /qtplugins/mustardmayo
     FILES shaders/blur.frag)
