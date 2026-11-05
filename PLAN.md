@@ -15,23 +15,23 @@ with a 3D board — architected so a more complex 3D game can be added later as 
 | Plugin assets | QML compiled into the `.so` with `qt_add_resources` (`qrc:/`) | Single-file deployment, no QML import-path setup in host |
 | Game logic | Plain C++ `QObject` model, exposed to QML | Unit-testable without a GPU |
 
-## Plugin interface (sketch)
+## Plugin interface
 
 ```cpp
 // sdk/include/qtplugins/IExtension.h
 class IExtension {
 public:
     virtual ~IExtension() = default;
-    virtual QString id() const = 0;          // stable, e.g. "org.example.tictactoe"
-    virtual QString displayName() const = 0;
     virtual QWidget *createWidget(QWidget *parent) = 0;  // host owns returned widget via parent
 };
-#define IExtension_iid "org.qtplugins.IExtension/1.0"
+#define IExtension_iid "org.qtplugins.IExtension/1"
 Q_DECLARE_INTERFACE(IExtension, IExtension_iid)
 ```
 
-Each plugin also ships a metadata JSON (`name`, `version`, `apiVersion`, `description`) so the host
-can list plugins via `QPluginLoader::metaData()` before instantiating them.
+Descriptive info lives only in each plugin's metadata JSON (`id`, `name`, `version`,
+`description`, `apiVersion`), so the host lists and validates plugins via
+`QPluginLoader::metaData()` before loading them — a library with the wrong IID or API version is
+never initialised.
 
 ## Layout
 
@@ -57,13 +57,13 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 - Commit
 
 ### Phase 1 — SDK + minimal host
-- [ ] `IExtension.h` interface + CMake INTERFACE target
-- [ ] `ExtensionManager`: scan dir (`--extensions-dir` arg, default `<appdir>/extensions`),
+- [x] `IExtension.h` interface + CMake INTERFACE target
+- [x] `ExtensionManager`: scan dir (`--extensions-dir` arg, default `<appdir>/extensions`),
       filter by platform suffix (`QLibrary::isLibrary`), read metadata, load with `QPluginLoader`,
       `qobject_cast<IExtension*>`, collect errors (wrong IID, Qt version mismatch, load failure)
-- [ ] `MainWindow`: list of loaded extensions (menu or side list) → open selected extension's widget
+- [x] `MainWindow`: list of loaded extensions (menu or side list) → open selected extension's widget
       in a tab/central area; show load errors in a status area
-- [ ] Keep host code small and copyable; no dependencies beyond QtWidgets
+- [x] Keep host code small and copyable; no dependencies beyond QtWidgets
 - Commit
 
 ### Phase 2 — Plugin loading tests

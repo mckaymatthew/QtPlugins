@@ -14,3 +14,9 @@ option(QTPLUGINS_BUILD_TESTS "Build unit tests" ON)
 # Every plugin's shared library is written here so the host can be pointed straight at it:
 #   build/host/qtplugins-host --extensions-dir build/extensions
 set(QTPLUGINS_EXTENSIONS_DIR "${CMAKE_BINARY_DIR}/extensions")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(QtPluginsExtension)
+
+add_subdirectory(sdk)
+add_subdirectory(host)
