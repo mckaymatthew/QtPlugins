@@ -13,6 +13,10 @@ existing host application at runtime. The repo contains:
   to be copied into the real host application later, so keep it small, self-contained, and free of
   example-only cleverness.
 - **plugins/tictactoe/** – example plugin: tic-tac-toe with a 3D-rendered board (Qt Quick 3D).
+- **plugins/mustardmayo/** – "Mustard and Mayonnaise" (spec: `Plugin Iteration 2 Ideas.md`). It
+  has typing, driving and destination phases, and a custom blur `ShaderEffect` built with
+  `qt_add_shaders`. A `Texture { sourceItem: ... }` doesn't reliably re-render after a property-only
+  change in Qt 6.4, so drive transient effects through 3D materials instead.
 - Later: a more complex 3D-accelerated game built on the same plugin architecture.
 
 See `Project.MD` for the original brief and `PLAN.md` for the implementation plan and status.
@@ -48,8 +52,8 @@ build/host/qtplugins-host --extensions-dir build/extensions [--open org.qtplugin
 cmake --install build --prefix <dir>         # bin/qtplugins-host + bin/extensions/*.so
 ```
 
-The smoke test saves screenshots to `build/tests/smoke-*.png` — look at them after visual changes
-to the board. Quick 3D needs OpenGL, so anything rendering must run under `xvfb-run` here.
+The smoke tests save screenshots to `build/tests/smoke-*.png` (tic-tac-toe) and
+`build/tests/mm-*.png` (Mustard and Mayonnaise). Look at them after any visual change. Quick 3D needs OpenGL, so anything rendering must run under `xvfb-run` here.
 
 New extensions use `qtplugins_add_extension()` (`cmake/QtPluginsExtension.cmake`) and must give
 their `qt_add_resources` a unique prefix (`/qtplugins/<name>`). See README.md for details.

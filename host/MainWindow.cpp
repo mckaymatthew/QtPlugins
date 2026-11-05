@@ -65,6 +65,7 @@ bool MainWindow::openExtension(const QString &id)
         return false;
     }
     m_tabs->setCurrentIndex(m_tabs->addTab(widget, extension->name));
+    widget->setFocus(); // so keyboard-driven extensions work without a click first
     return true;
 }
 

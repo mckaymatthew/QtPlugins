@@ -38,7 +38,7 @@ public:
     qreal distance() const { return m_distance; }           // metres driven
     qreal progress() const { return m_progress; }           // 0 .. 1
     qreal blur() const { return m_blur; }                   // 0 .. 1
-    qreal speed() const { return 25.0; }                    // m/s, about 55 mph
+    qreal speed() const { return 24.6; }                    // m/s, 55 mph
     qreal duration() const { return m_duration; }           // seconds of in-lane driving needed
     void setDuration(qreal seconds);
     Warning warning() const { return m_warning; }

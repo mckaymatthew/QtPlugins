@@ -1,15 +1,24 @@
 # QtPlugins
 
 Runtime-loadable Qt 6 extensions (`.so` / `.dll` / macOS plugin) and a minimal host that loads them
-from a directory. The example extension is tic-tac-toe on a Qt Quick 3D board.
+from a directory. There are two example extensions, both rendered with Qt Quick 3D:
+
+- **Tic-tac-toe** on a 3D board, against a friend or the computer.
+- **Mustard and Mayonnaise**, a three-phase game:
+  1. At work late at night, type C++ until you're too tired to read it.
+  2. Drive home and keep the car between the yellow line ("Get out the mustard!") and the white
+     line ("Stay off the mayo!") while your vision keeps blurring.
+  3. Go home to bed, or stop at What-A-Burger and head back to work.
 
 ![Tic-tac-toe extension](docs/tictactoe.png)
+![Mustard and Mayonnaise extension](docs/mustardmayo.png)
 
 ```
 sdk/include/qtplugins/IExtension.h   the host ⇄ extension contract (header-only)
 host/                                example host: ExtensionManager (reusable) + MainWindow (demo)
 plugins/hello/                       smallest possible extension
 plugins/tictactoe/                   GameModel (rules + minimax AI) and the 3D QML board
+plugins/mustardmayo/                 typing/driving/phase models, six 3D scenes, a blur shader
 tests/                               unit tests + an Xvfb rendering smoke test
 cmake/QtPluginsExtension.cmake       qtplugins_add_extension() helper
 ```
@@ -28,10 +37,11 @@ build/host/qtplugins-host --extensions-dir build/extensions
 
 Host options: `--extensions-dir <dir>` (default: `extensions/` next to the executable, or
 `Contents/PlugIns/extensions` in a macOS bundle) and `--open <id>` to open an extension at startup,
-e.g. `--open org.qtplugins.tictactoe`.
+e.g. `--open org.qtplugins.tictactoe` or `--open org.qtplugins.mustardmayo`.
 
-`ctest` runs `smoke_tictactoe` under `xvfb-run` on Linux (Mesa software rendering is fine). It
-writes screenshots to `build/tests/smoke-*.png`.
+On Linux, `ctest` runs the smoke tests `smoke_tictactoe` and `smoke_mustardmayo` under `xvfb-run`.
+Mesa software rendering is enough. The tests write screenshots to `build/tests/smoke-*.png`
+(tic-tac-toe) and `build/tests/mm-*.png` (one per Mustard and Mayonnaise scene).
 
 ## How it works
 

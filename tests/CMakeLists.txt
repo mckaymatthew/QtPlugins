@@ -27,21 +27,24 @@ qt_add_executable(tst_gamemodel tst_gamemodel.cpp)
 target_link_libraries(tst_gamemodel PRIVATE tictactoe_core Qt6::Test)
 add_test(NAME tst_gamemodel COMMAND tst_gamemodel)
 
-# Rendering smoke test: needs a display with OpenGL, so on headless Linux it runs under Xvfb.
-qt_add_executable(smoke_tictactoe smoke_tictactoe.cpp)
-target_link_libraries(smoke_tictactoe PRIVATE qtplugins_extensionmanager Qt6::Widgets Qt6::Quick Qt6::Test)
-target_compile_definitions(smoke_tictactoe PRIVATE
-    EXTENSIONS_DIR="${QTPLUGINS_EXTENSIONS_DIR}"
-    SCREENSHOT_DIR="${CMAKE_CURRENT_BINARY_DIR}")
-add_dependencies(smoke_tictactoe tictactoe)
-find_program(XVFB_RUN xvfb-run)
-if(XVFB_RUN)
-    add_test(NAME smoke_tictactoe
-             COMMAND ${XVFB_RUN} -a -s "-screen 0 1280x1024x24" $<TARGET_FILE:smoke_tictactoe>)
-elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_test(NAME smoke_tictactoe COMMAND smoke_tictactoe)
-endif()
-
 qt_add_executable(tst_mustardmayo tst_mustardmayo.cpp)
 target_link_libraries(tst_mustardmayo PRIVATE mustardmayo_core Qt6::Test)
 add_test(NAME tst_mustardmayo COMMAND tst_mustardmayo)
+
+# Rendering smoke tests: need a display with OpenGL, so on headless Linux they run under Xvfb.
+find_program(XVFB_RUN xvfb-run)
+foreach(game tictactoe mustardmayo)
+    qt_add_executable(smoke_${game} smoke_${game}.cpp SmokeUtils.h)
+    target_link_libraries(smoke_${game} PRIVATE
+        qtplugins_extensionmanager Qt6::Widgets Qt6::Quick Qt6::Test)
+    target_compile_definitions(smoke_${game} PRIVATE
+        EXTENSIONS_DIR="${QTPLUGINS_EXTENSIONS_DIR}"
+        SCREENSHOT_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+    add_dependencies(smoke_${game} ${game})
+    if(XVFB_RUN)
+        add_test(NAME smoke_${game}
+                 COMMAND ${XVFB_RUN} -a -s "-screen 0 1280x1024x24" $<TARGET_FILE:smoke_${game}>)
+    elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_test(NAME smoke_${game} COMMAND smoke_${game})
+    endif()
+endforeach()

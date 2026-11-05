@@ -115,14 +115,14 @@ library with unit tests, Qt Quick 3D scenes in QML compiled into the plugin.
       steering, mustard/mayo warnings, progress only while in lane), `MustardMayoGame` (phase
       state machine: work → drive → destination → home → asleep, or → burger → eat → work)
 - [x] Unit tests for all three
-- [ ] Blur post-effect: custom `ShaderEffect` with a `qt_add_shaders`-compiled shader (no extra
+- [x] Blur post-effect: custom `ShaderEffect` with a `qt_add_shaders`-compiled shader (no extra
       QML module dependency; works on Qt 6.4)
-- [ ] Scenes: office at night (monitor showing the code as a live texture, keyboard, out-of-focus
+- [x] Scenes: office at night (monitor showing the code as a live texture, keyboard, out-of-focus
       circuit cards and wires as a separately blurred layer), night drive (curved road, dashed
       yellow / solid white lines, headlights, dashboard + steering wheel), road-sign fork,
       house, burger joint, bedtime card
-- [ ] Smoke test driving every phase through real key input + screenshots
-- [ ] Host: give an opened extension keyboard focus
+- [x] Smoke test driving every phase through real key input + screenshots
+- [x] Host: give an opened extension keyboard focus
 - Commit after the model + tests, and again after the scenes + smoke test
 
 ### Phase 7 — Complex 3D game *(future)*
