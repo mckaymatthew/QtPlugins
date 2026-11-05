@@ -150,5 +150,5 @@ That is convenient for local installs. For distribution, use the deployment tool
 - **Linux:** developed on headless Ubuntu 24.04 with Qt 6.4.2 from apt.
 - **macOS (Apple silicon):** not yet verified. See [docs/macos-setup.md](docs/macos-setup.md). Install Qt 6.4.x–6.5 LTS with the Qt online
   installer or `aqtinstall`. Homebrew ships a much newer Qt.
-- **Windows x64 (MSVC):** built and tested in CI on every push. See
+- **Windows x64 (MSVC 2019, v142):** built and tested in CI on every push. See
   [docs/windows-setup.md](docs/windows-setup.md).

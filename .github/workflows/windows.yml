@@ -21,10 +21,20 @@ jobs:
           modules: 'qtquick3d qtshadertools qtquicktimeline'
           cache: true
 
-      - name: Set up MSVC (x64)
+      - name: Set up MSVC 2019 (v142 toolset, x64)
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+          toolset: '14.29'
+
+      - name: Check the compiler is MSVC 2019
+        shell: pwsh
+        run: |
+          $banner = (cl 2>&1 | Out-String)
+          Write-Output $banner
+          if ($banner -notmatch 'Version 19\.29\.' -or $banner -notmatch 'for x64') {
+            throw "expected MSVC 2019 (19.29) for x64"
+          }
 
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release

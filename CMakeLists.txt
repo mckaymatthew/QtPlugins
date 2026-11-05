@@ -9,6 +9,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Sources are UTF-8; without this MSVC reads them in the local code page and mangles string literals.
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
+# Windows builds target MSVC 2019 x64 (v142, matching Qt's msvc2019_64 kit). Newer MSVC can link
+# against it, but host and extensions should all be built with the same toolset.
+if(MSVC AND (MSVC_VERSION LESS 1920 OR MSVC_VERSION GREATER_EQUAL 1930
+             OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8))
+    message(WARNING "This project targets MSVC 2019 x64 (v142); you are using MSVC ${MSVC_VERSION} "
+                    "with ${CMAKE_SIZEOF_VOID_P}-byte pointers. See docs/windows-setup.md.")
+endif()
+
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
 

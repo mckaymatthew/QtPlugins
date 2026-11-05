@@ -1,13 +1,19 @@
 # Windows (x64) setup
 
-Builds with MSVC and Ninja. Continuous integration (`.github/workflows/windows.yml`) builds and
-tests the same configuration on every push.
+The Windows target is **MSVC 2019 x64** (toolset v142, compiler 19.29), matching Qt's
+`msvc2019_64` kit. Continuous integration (`.github/workflows/windows.yml`) builds and tests
+exactly that configuration on every push. Build the host and every extension with the same toolset.
 
 ## 1. Install the tools
 
-- **Visual Studio 2022** (Community or Build Tools), with the *Desktop development with C++*
-  workload. This includes CMake and Ninja.
-- **Qt 6.5.3**, kit **MSVC 2019 64-bit** (it is ABI-compatible with VS 2022), with the
+- **The MSVC 2019 x64 compiler.** Install either:
+  - **Visual Studio 2019** (Community or Build Tools) with the *Desktop development with C++*
+    workload, or
+  - **Visual Studio 2022** with *Desktop development with C++*, plus the individual component
+    *MSVC v142 - VS 2019 C++ x64/x86 build tools*.
+
+  Both include CMake and Ninja.
+- **Qt 6.5.3**, kit **MSVC 2019 64-bit**, with the
   **Qt Quick 3D** and **Qt Shader Tools** add-ons. Install it with either:
   - the [Qt online installer](https://www.qt.io/download-qt-installer) (needs a free Qt account), or
   - `aqtinstall` (no account):
@@ -22,8 +28,14 @@ tests the same configuration on every push.
 
 ## 2. Build and test
 
-Open **x64 Native Tools Command Prompt for VS 2022**. It must be the x64 prompt: the default
-Developer prompt builds 32-bit. Then run:
+Open a prompt set up for the MSVC 2019 x64 compiler:
+
+- **VS 2019:** *x64 Native Tools Command Prompt for VS 2019*.
+- **VS 2022:** any command prompt, then run
+  `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.29`.
+  Adjust the path for your edition.
+
+`cl` should report `Version 19.29` and `for x64`. Then run:
 
 ```bat
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:\Qt\6.5.3\msvc2019_64
@@ -34,8 +46,11 @@ ctest --test-dir build --output-on-failure
 `ctest` puts Qt's DLLs on `PATH` for the tests itself. The smoke tests open real windows and render
 through Direct3D 11.
 
-The Visual Studio generator (`-G "Visual Studio 17 2022"`) also works. Pass `--config Release` to
-`cmake --build`, and `-C Release` to `ctest`. Extensions still land in `build\extensions`.
+CMake warns at configure time if the compiler isn't MSVC 2019 x64.
+
+The Visual Studio generators also work: `-G "Visual Studio 16 2019" -A x64`, or with VS 2022,
+`-G "Visual Studio 17 2022" -A x64 -T v142`. Pass `--config Release` to `cmake --build`, and
+`-C Release` to `ctest`. Extensions still land in `build\extensions`.
 
 ## 3. Run
 
