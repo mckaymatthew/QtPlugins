@@ -47,7 +47,7 @@ private slots:
     void typingCorrectCharactersAdvance()
     {
         TypingSession typing;
-        for (const QString &c : {"/", "/", " ", "f"})
+        for (const QString &c : {"b", "o", "o", "l"})
             QVERIFY(typing.typeText(c));
         QCOMPARE(typing.typedLength(), 4);
         QCOMPARE(typing.typos(), 0);
@@ -82,13 +82,13 @@ private slots:
         const int secondLine = code.indexOf('\n') + 1;
         while (typing.typedLength() < secondLine)
             QVERIFY(typeNext(typing));
-        QCOMPARE(code.mid(typing.typedLength(), 4), QStringLiteral("bool"));
+        // The four spaces of indentation were filled in.
+        QCOMPARE(code.mid(typing.typedLength(), 2), QStringLiteral("if"));
 
         const int thirdLine = code.indexOf('\n', secondLine) + 1;
         while (typing.typedLength() < thirdLine)
             QVERIFY(typeNext(typing));
-        // The four spaces of indentation were filled in.
-        QCOMPARE(code.mid(typing.typedLength(), 2), QStringLiteral("if"));
+        QCOMPARE(code.mid(typing.typedLength(), 6), QStringLiteral("return")); // eight spaces
     }
 
     void typingFinishingTheCodeEndsTheNight()

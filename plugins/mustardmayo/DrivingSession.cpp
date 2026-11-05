@@ -58,7 +58,7 @@ QString DrivingSession::warningText() const
 {
     switch (m_warning) {
     case Mustard:
-        return tr("Get out the mustard!");
+        return tr("Get out of the mustard!");
     case Mayo:
         return tr("Stay off the mayo!");
     case NoWarning:

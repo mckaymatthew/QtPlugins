@@ -119,7 +119,7 @@ Item {
         }
     }
 
-    // Close-up of the cheeseburger once it arrives.
+    // The cheeseburger arrives: a photo that slowly zooms in on the patty while you eat.
     Item {
         id: closeUp
         anchors.fill: parent
@@ -129,34 +129,33 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "#e0100c08" }
-                GradientStop { position: 1.0; color: "#f0000000" }
-            }
+            color: "#e8000000"
         }
 
-        View3D {
-            anchors.fill: parent
-            environment: SceneEnvironment {
-                backgroundMode: SceneEnvironment.Transparent
-                antialiasingMode: SceneEnvironment.MSAA
-                antialiasingQuality: SceneEnvironment.High
-            }
+        Rectangle { // photo frame
+            id: frame
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: -10
+            width: Math.min(parent.width * 0.78, (parent.height * 0.66) * photo.aspect)
+            height: width / photo.aspect
+            color: "black"
+            radius: 12
+            clip: true
+            border { color: "#40ffffff"; width: 2 }
 
-            PerspectiveCamera { position: Qt.vector3d(0, 135, 240); eulerRotation.x: -22; fieldOfView: 45 }
-            DirectionalLight { eulerRotation: Qt.vector3d(-45, -30, 0); brightness: 1.2; color: "#fff1dc"; castsShadow: true }
-            DirectionalLight { eulerRotation: Qt.vector3d(-10, 150, 0); brightness: 0.5; color: "#9fb4ff" } // rim
-            PointLight { position: Qt.vector3d(0, 160, 120); brightness: 0.6; color: "#ffd9a0" }
-
-            Burger {
-                y: 10
-                scale: Qt.vector3d(grow, grow, grow)
-                property real grow: closeUp.visible ? 1 : 0.2
-                Behavior on grow { NumberAnimation { duration: 600; easing.type: Easing.OutBack } }
-                NumberAnimation on eulerRotation.y {
-                    from: 0; to: 360; duration: 16000
-                    loops: Animation.Infinite
-                    running: closeUp.visible
+            Image {
+                id: photo
+                readonly property real aspect: implicitHeight > 0 ? implicitWidth / implicitHeight : 16 / 9
+                anchors.fill: parent
+                anchors.margins: 2
+                source: "assets/burger.png"
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+                mipmap: true
+                transform: Scale { // zoom towards the patty's holes as the burger disappears
+                    origin { x: photo.width * 0.42; y: photo.height * 0.58 }
+                    xScale: 1 + 1.4 * scene.progress
+                    yScale: xScale
                 }
             }
         }

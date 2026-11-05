@@ -21,7 +21,6 @@ host/                                example host: ExtensionManager (reusable) +
 plugins/hello/                       smallest possible extension
 plugins/tictactoe/                   GameModel (rules + minimax AI) and the 3D QML board
 plugins/mustardmayo/                 typing/driving/phase models, six 3D scenes, a blur shader
-scripts/generate_burger_textures.py  regenerates the burger's pitted textures (plugins/mustardmayo/assets)
 tests/                               unit tests + an Xvfb rendering smoke test
 cmake/QtPluginsExtension.cmake       qtplugins_add_extension() helper
 ```

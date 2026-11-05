@@ -2,11 +2,10 @@
 
 namespace {
 
-const char Code[] = "// flight_test.cpp -- due 06:00\n"
-                    "bool preflight(Jet &jet) {\n"
-                    "    if (!jet.sensorsOk())\n"
+const char Code[] = "bool preflight(Algorithms &a) {\n"
+                    "    if (!a.sensorsOk())\n"
                     "        return false;\n"
-                    "    return jet.fuel() > 0.9;\n"
+                    "    return a.errantFlight() > 0.9;\n"
                     "}\n";
 
 // Keystrokes, as a multiple of the snippet's length, after which the screen is unreadable even if

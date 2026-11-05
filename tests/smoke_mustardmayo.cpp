@@ -97,7 +97,7 @@ private slots:
     {
         QCOMPARE(phase(), QStringLiteral("work"));
         settle();
-        typeKeys("// flight");
+        typeKeys("bool pref");
         QCOMPARE(m_typing->property("typedLength").toInt(), 9);
         typeKeys("Q"); // typo
         QCOMPARE(m_typing->property("typos").toInt(), 1);
@@ -128,7 +128,7 @@ private slots:
         QTest::keyPress(m_view, Qt::Key_Left);
         QTRY_VERIFY_WITH_TIMEOUT(lanePosition() < -1.05, 8000);
         QTest::qWait(300);
-        QCOMPARE(m_driving->property("warningText").toString(), QStringLiteral("Get out the mustard!"));
+        QCOMPARE(m_driving->property("warningText").toString(), QStringLiteral("Get out of the mustard!"));
         expectRendered("mm-drive-mustard");
         QTest::keyRelease(m_view, Qt::Key_Left);
 
