@@ -1,0 +1,7 @@
+{
+    "id": "org.qtplugins.tictactoe",
+    "name": "Tic-Tac-Toe 3D",
+    "version": "1.0.0",
+    "description": "Tic-tac-toe on a 3D board, against a friend or the computer.",
+    "apiVersion": 1
+}

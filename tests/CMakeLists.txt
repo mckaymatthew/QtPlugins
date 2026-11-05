@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Test)
+find_package(Qt6 REQUIRED COMPONENTS Test Quick)
 
 # Broken/foreign libraries the ExtensionManager must reject, built into their own directory.
 set(FIXTURE_DIR "${CMAKE_CURRENT_BINARY_DIR}/fixture-extensions")
@@ -24,3 +24,18 @@ set_tests_properties(tst_extensionmanager PROPERTIES ENVIRONMENT "QT_QPA_PLATFOR
 qt_add_executable(tst_gamemodel tst_gamemodel.cpp)
 target_link_libraries(tst_gamemodel PRIVATE tictactoe_core Qt6::Test)
 add_test(NAME tst_gamemodel COMMAND tst_gamemodel)
+
+# Rendering smoke test: needs a display with OpenGL, so on headless Linux it runs under Xvfb.
+qt_add_executable(smoke_tictactoe smoke_tictactoe.cpp)
+target_link_libraries(smoke_tictactoe PRIVATE qtplugins_extensionmanager Qt6::Widgets Qt6::Quick Qt6::Test)
+target_compile_definitions(smoke_tictactoe PRIVATE
+    EXTENSIONS_DIR="${QTPLUGINS_EXTENSIONS_DIR}"
+    SCREENSHOT_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+add_dependencies(smoke_tictactoe tictactoe)
+find_program(XVFB_RUN xvfb-run)
+if(XVFB_RUN)
+    add_test(NAME smoke_tictactoe
+             COMMAND ${XVFB_RUN} -a -s "-screen 0 1280x1024x24" $<TARGET_FILE:smoke_tictactoe>)
+elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_test(NAME smoke_tictactoe COMMAND smoke_tictactoe)
+endif()

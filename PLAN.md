@@ -11,7 +11,7 @@ with a 3D board — architected so a more complex 3D game can be added later as 
 | Build | CMake + Ninja, `qt_standard_project_setup()` | Qt6's first-class build system |
 | Plugin mechanism | `QPluginLoader` + `Q_DECLARE_INTERFACE` / `Q_PLUGIN_METADATA` | Standard Qt plugin system; version/build-key checks for free; metadata readable without loading the library |
 | Host UI toolkit | Qt Widgets (`QMainWindow`) | Most likely shape of an existing app; plugin returns a `QWidget*` |
-| 3D | Qt Quick 3D, hosted in the plugin's widget via `QQuickWidget` | Qt3D is in maintenance; Quick 3D is the future-proof path for the later, bigger game |
+| 3D | Qt Quick 3D in a `QQuickView`, embedded with `QWidget::createWindowContainer` | Qt3D is in maintenance; Quick 3D is the future-proof path for the later, bigger game |
 | Plugin assets | QML compiled into the `.so` with `qt_add_resources` (`qrc:/`) | Single-file deployment, no QML import-path setup in host |
 | Game logic | Plain C++ `QObject` model, exposed to QML | Unit-testable without a GPU |
 
@@ -80,13 +80,16 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 - Commit
 
 ### Phase 4 — 3D board plugin
-- [ ] `TicTacToePlugin` implementing `IExtension`; `createWidget()` returns a `QQuickWidget`
-      loading `qrc:/tictactoe/Board.qml` with the `GameModel` exposed (initial property / context)
-- [ ] `Board.qml`: `View3D` with camera, lights, board base + grid bars, 9 pickable cells
-      (`View3D.pick()` on click), X/O pieces built from primitive meshes (cylinders/torus-ish via
-      `#Cylinder`/custom), win highlight, reset button overlay; subtle camera orbit
-- [ ] Headless smoke test: run host under `xvfb-run`, load plugin, grab a screenshot to verify
-      the scene renders
+- [x] `TicTacToeExtension` implementing `IExtension`; `createWidget()` returns a window container
+      around a `QQuickView` loading `qrc:/qtplugins/tictactoe/Board.qml`, `GameModel` exposed as a
+      per-view context property
+- [x] `Board.qml`: `View3D` with camera, lights + shadows, board base + grid bars, cell picking
+      (`View3D.pick()` on the board surface), X from crossed bars / O as a segmented torus,
+      drop-in animation, pulsing glow on the winning line, hover highlight, status/score overlay,
+      New game + opponent toggle; gentle camera sway
+- [x] Headless smoke test (`tests/smoke_tictactoe`, runs under `xvfb-run`): loads the plugin via
+      `ExtensionManager`, checks the scene renders, clicks a cell, plays to a win, fails on QML
+      warnings, saves screenshots to `build/tests/smoke-*.png`
 - Commit
 
 ### Phase 5 — Deployment & docs
@@ -111,7 +114,9 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
   `createQuickItem()`-style entry point (or a QML module URL) to the interface — cheap to do now.
 - **Headless rendering:** Quick 3D needs OpenGL; on the VM this means Mesa llvmpipe under Xvfb.
   Verified in Phase 0 so it doesn't surprise us in Phase 4.
-- **`QQuickWidget` vs `createWindowContainer`:** `QQuickWidget` composes cleanly with widgets but
-  renders via an offscreen FBO (some cost). Fine for tic-tac-toe; revisit for the heavier game.
+- **Window container vs `QQuickWidget` (decided):** in Qt < 6.7 `QQuickWidget` only renders via
+  OpenGL (no Metal on macOS) and adds an offscreen copy, so the plugin uses `QQuickView` +
+  `createWindowContainer`, which uses the native RHI backend. Trade-off: a native child window
+  can't be overlapped by sibling widgets and has some focus/stacking quirks.
 - **ABI coupling:** Qt plugins are not stable across compilers/Qt minor versions in practice —
   plugins must ship per platform and per host Qt build.
