@@ -101,6 +101,7 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 
 ### Phase 6 — macOS (M2) bring-up *(later, interactive)*
 - [ ] **Ask permission** before installing Qt / CMake / Ninja on the Mac
+      (setup steps, including aqt timeout workaround: `docs/macos-setup.md`)
 - [ ] Build & run; verify Metal RHI backend renders the board, tune visuals/interaction
 - Commit
 

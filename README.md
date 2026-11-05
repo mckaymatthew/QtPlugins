@@ -135,6 +135,6 @@ That is convenient for local installs. For distribution, use the deployment tool
 ## Platforms
 
 - **Linux:** developed on headless Ubuntu 24.04 with Qt 6.4.2 from apt.
-- **macOS (Apple silicon):** not yet verified. Install Qt 6.4.x–6.5 LTS with the Qt online
+- **macOS (Apple silicon):** not yet verified. See [docs/macos-setup.md](docs/macos-setup.md). Install Qt 6.4.x–6.5 LTS with the Qt online
   installer or `aqtinstall`. Homebrew ships a much newer Qt.
 - **Windows:** not yet verified. Use the Qt online installer with an MSVC 2019/2022 kit.
