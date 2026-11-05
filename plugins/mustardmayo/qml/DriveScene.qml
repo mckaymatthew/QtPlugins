@@ -8,13 +8,11 @@ Item {
     focus: true
 
     readonly property var driving: game.driving
-    readonly property real laneHalfWidth: 180
+    readonly property real laneHalfWidth: 140
     readonly property real carHalfWidth: 90
     readonly property real carX: driving.lanePosition * (laneHalfWidth - carHalfWidth)
     readonly property real sliceLength: 1200
     readonly property int sliceCount: 16
-    // Road bend: lateral offset grows with the square of the distance ahead.
-    readonly property real bend: driving.curvature * 9e-6
 
     function setKey(key, held) {
         if (key === Qt.Key_Left || key === Qt.Key_A) {
@@ -88,13 +86,16 @@ Item {
                     readonly property real zNear: (scene.driving.distance * 100) % scene.sliceLength
                                                   - index * scene.sliceLength
                     readonly property real zCentre: zNear - scene.sliceLength / 2
-                    position: Qt.vector3d(scene.bend * zCentre * zCentre, 0, zCentre)
-                    eulerRotation.y: Math.atan(2 * scene.bend * zCentre) * 180 / Math.PI
+                    // The model knows the road ahead; `distance` in the binding re-evaluates it
+                    // every frame.
+                    readonly property real ahead: -zCentre / 100 + 0 * scene.driving.distance
+                    position: Qt.vector3d(scene.driving.roadOffsetAt(ahead) * 100, 0, zCentre)
+                    eulerRotation.y: -scene.driving.roadHeadingAt(ahead) * 180 / Math.PI
 
                     Model { // asphalt: oncoming lane, our lane and a shoulder
                         source: "#Cube"
-                        position: Qt.vector3d(-130, -1, 0)
-                        scale: Qt.vector3d(8.6, 0.02, scene.sliceLength / 100 + 0.05)
+                        position: Qt.vector3d(-90, -1, 0)
+                        scale: Qt.vector3d(7.0, 0.02, scene.sliceLength / 100 + 0.1)
                         materials: PrincipledMaterial { baseColor: "#26272b"; roughness: 0.9 }
                     }
                     Model { // yellow dash (3 m dash, 9 m gap)
@@ -122,7 +123,7 @@ Item {
                         materials: PrincipledMaterial { baseColor: "#bbbbbb" }
                     }
                     Node { // reflector post
-                        position: Qt.vector3d(scene.laneHalfWidth + 220, 0, 0)
+                        position: Qt.vector3d(scene.laneHalfWidth + 190, 0, 0)
                         Model {
                             source: "#Cube"
                             y: 50

@@ -91,7 +91,7 @@ private slots:
         QCOMPARE(code.mid(typing.typedLength(), 2), QStringLiteral("if"));
     }
 
-    void typingBecomesUnreadableBeforeTheEnd()
+    void typingFinishingTheCodeEndsTheNight()
     {
         TypingSession typing;
         qreal last = 0;
@@ -100,8 +100,18 @@ private slots:
             QVERIFY(typing.fatigue() >= last);
             last = typing.fatigue();
         }
+        // A clean run stays readable to the very last character.
+        QCOMPARE(typing.typedLength(), int(typing.code().size()));
         QCOMPARE(typing.fatigue(), 1.0);
-        QVERIFY(typing.typedLength() < typing.code().size());
+    }
+
+    void typingStaysFreshForTheFirstLines()
+    {
+        TypingSession typing;
+        const int thirdLine = typing.code().indexOf('\n', typing.code().indexOf('\n') + 1) + 1;
+        while (typing.typedLength() < thirdLine)
+            QVERIFY(typeNext(typing));
+        QVERIFY2(typing.fatigue() < 0.5, qPrintable(QString::number(typing.fatigue())));
     }
 
     void typingMashingKeysAlsoTires()
@@ -214,6 +224,55 @@ private slots:
         const qreal distance = driving.distance();
         driving.advance(0.5);
         QCOMPARE(driving.distance(), distance); // stopped
+    }
+
+    void drivingRoadAheadMatchesTheDrive()
+    {
+        // The road drawn ahead must be the road driven: d(offset)/dd = heading, and
+        // d(heading)/dd = the curvature the car meets after driving that far.
+        constexpr qreal RoadCurvature = 0.004; // DrivingSession.cpp
+        DrivingSession now;
+        drive(now, 3);
+        QCOMPARE(now.roadOffsetAt(0), 0.0);
+        QCOMPARE(now.roadHeadingAt(0), 0.0);
+
+        for (qreal ahead : {20.0, 75.0, 150.0}) {
+            const qreal h = 0.5;
+            const qreal slope = (now.roadOffsetAt(ahead + h) - now.roadOffsetAt(ahead - h)) / (2 * h);
+            QVERIFY(qAbs(slope - now.roadHeadingAt(ahead)) < 1e-4);
+
+            DrivingSession later; // same clock as `now`, then exactly `ahead` metres further
+            drive(later, 3);
+            later.advance(ahead / later.speed());
+            const qreal turn = (now.roadHeadingAt(ahead + h) - now.roadHeadingAt(ahead - h)) / (2 * h);
+            QVERIFY2(qAbs(turn - RoadCurvature * later.curvature()) < 1e-6,
+                     qPrintable(QStringLiteral("%1 m: %2 vs %3").arg(ahead).arg(turn)
+                                    .arg(RoadCurvature * later.curvature())));
+        }
+    }
+
+    void drivingIsBeatable()
+    {
+        // A simple driver that corrects whenever it drifts off centre must get home without
+        // spending long over the lines, whatever the blur episodes do.
+        for (quint32 seed : {1u, 2u, 3u, 4u, 5u}) {
+            DrivingSession driving;
+            driving.setSeed(seed);
+            const qreal dt = 1.0 / 60;
+            qreal time = 0, outside = 0;
+            while (driving.progress() < 1 && time < 120) {
+                const qreal x = driving.lanePosition();
+                driving.setLeftHeld(x > 0.25);
+                driving.setRightHeld(x < -0.25);
+                driving.advance(dt);
+                time += dt;
+                if (qAbs(driving.lanePosition()) > 1)
+                    outside += dt;
+            }
+            qInfo("seed %u: home in %.1f s, %.1f s over a line", seed, time, outside);
+            QCOMPARE(driving.progress(), 1.0);
+            QVERIFY(outside < 0.1 * time);
+        }
     }
 
     void drivingRunsOnItsTimer()

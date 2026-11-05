@@ -53,13 +53,13 @@ Item {
         }
         Model { // road ahead
             source: "#Cube"
-            position: Qt.vector3d(-130, -1, -3000)
-            scale: Qt.vector3d(8.6, 0.02, 60)
+            position: Qt.vector3d(-90, -1, -3000)
+            scale: Qt.vector3d(7.0, 0.02, 60)
             materials: PrincipledMaterial { baseColor: "#26272b" }
         }
         Model { // white edge line
             source: "#Cube"
-            position: Qt.vector3d(180, 0.5, -3000)
+            position: Qt.vector3d(140, 0.5, -3000)
             scale: Qt.vector3d(0.12, 0.01, 60)
             materials: PrincipledMaterial { baseColor: "#eeeeee"; emissiveFactor: Qt.vector3d(0.2, 0.2, 0.2) }
         }

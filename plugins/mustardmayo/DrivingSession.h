@@ -48,6 +48,12 @@ public:
     Q_INVOKABLE void setLeftHeld(bool held);
     Q_INVOKABLE void setRightHeld(bool held);
 
+    // Shape of the road `metres` ahead of the car, relative to the road at the car: lateral
+    // offset of the lane centre in metres (positive = right) and heading in radians. The bends
+    // drawn ahead are exactly the curvature the car will drift through when it gets there.
+    Q_INVOKABLE qreal roadOffsetAt(qreal metres) const;
+    Q_INVOKABLE qreal roadHeadingAt(qreal metres) const;
+
     void start();
     void stop();
     void reset();
@@ -65,6 +71,7 @@ signals:
     void finished();
 
 private:
+    static qreal curvatureAt(qreal time);
     void tick();
     void scheduleNextEpisode();
     void setWarning(Warning warning);

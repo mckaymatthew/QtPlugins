@@ -8,7 +8,8 @@ Item {
 
     readonly property var typing: game.typing
     readonly property real pixelScale: height / 600
-    readonly property real fatigueBlur: Math.pow(typing.fatigue, 2) * 26 * pixelScale
+    // Stays readable for most of the snippet, then fades out fast near the end.
+    readonly property real fatigueBlur: Math.pow(typing.fatigue, 3) * 22 * pixelScale
     property int pressedKey: -1
     property bool typoFlash: false
 

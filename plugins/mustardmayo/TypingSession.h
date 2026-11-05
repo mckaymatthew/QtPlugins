@@ -5,7 +5,7 @@
 
 // Phase 1, at work: the player types a fixed snippet of C++. Correct characters advance through
 // the code; every keystroke (right or wrong) adds fatigue, which the scene shows as blur. At full
-// fatigue the screen is unreadable and the player may go home.
+// fatigue (or once the code is finished) the screen is unreadable and the player may go home.
 class TypingSession : public QObject
 {
     Q_OBJECT

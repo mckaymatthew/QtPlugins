@@ -4,13 +4,23 @@
 
 namespace {
 
-constexpr qreal SteerRate = 0.9;      // lane units per second at full lock
-constexpr qreal CurveDrift = 0.35;    // lane units per second pushed outward at full curvature
-constexpr qreal WobbleDrift = 0.45;   // extra drift while vision is blurred
+// Lane units: +-1 is a wheel on a line. With a 2.8 m lane and a 1.8 m car, one unit is 0.5 m.
+constexpr qreal SteerRate = 1.5;      // lane units per second at full lock
+constexpr qreal CurveDrift = 0.7;     // lane units per second pushed outward at full curvature
+constexpr qreal WobbleDrift = 0.6;    // extra drift while vision is blurred
 constexpr qreal BlurredSteering = 0.6;
 constexpr qreal MaxOffset = 1.8;      // car is fully across the line
 constexpr qreal EpisodeLength = 2.6;  // seconds
 constexpr qreal WarningHold = 1.2;    // seconds a warning lingers after returning to the lane
+
+// The road winds as the sum of two sines in time (amplitude, angular frequency, phase): S-bends
+// roughly every 300 m and 120 m at driving speed.
+struct Bend
+{
+    qreal amplitude, omega, phase;
+};
+constexpr Bend Bends[] = {{0.6, 0.45, 0.0}, {0.4, 1.25, 1.3}};
+constexpr qreal RoadCurvature = 0.004; // 1/m at curvature 1 (a 250 m radius)
 
 } // namespace
 
@@ -97,8 +107,7 @@ void DrivingSession::advance(qreal dt)
         return;
     m_time += dt;
 
-    // Gently winding road from two incommensurate sines.
-    m_curvature = 0.6 * qSin(0.21 * m_time) + 0.4 * qSin(0.53 * m_time + 1.3);
+    m_curvature = curvatureAt(m_time);
 
     // Vision blur episodes.
     if (m_episodeTime < 0) {
@@ -144,6 +153,40 @@ void DrivingSession::advance(qreal dt)
         stop();
         emit finished();
     }
+}
+
+qreal DrivingSession::curvatureAt(qreal time)
+{
+    qreal c = 0;
+    for (const Bend &b : Bends)
+        c += b.amplitude * qSin(b.omega * time + b.phase);
+    return c;
+}
+
+// Heading and offset are the first and second integrals of curvature over distance; for sines
+// they have closed forms. With t0 = now, v = speed, a = omega * t0 + phase, k = omega / v:
+//   heading(d) = K * sum A / k * (cos a - cos(a + k d))
+//   offset(d)  = K * sum A / k * (d cos a - (sin(a + k d) - sin a) / k)
+qreal DrivingSession::roadHeadingAt(qreal metres) const
+{
+    qreal heading = 0;
+    for (const Bend &b : Bends) {
+        const qreal a = b.omega * m_time + b.phase;
+        const qreal k = b.omega / speed();
+        heading += b.amplitude / k * (qCos(a) - qCos(a + k * metres));
+    }
+    return RoadCurvature * heading;
+}
+
+qreal DrivingSession::roadOffsetAt(qreal metres) const
+{
+    qreal offset = 0;
+    for (const Bend &b : Bends) {
+        const qreal a = b.omega * m_time + b.phase;
+        const qreal k = b.omega / speed();
+        offset += b.amplitude / k * (metres * qCos(a) - (qSin(a + k * metres) - qSin(a)) / k);
+    }
+    return RoadCurvature * offset;
 }
 
 void DrivingSession::tick()

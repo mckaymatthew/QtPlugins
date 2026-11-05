@@ -9,9 +9,9 @@ const char Code[] = "// flight_test.cpp -- due 06:00\n"
                     "    return jet.fuel() > 0.9;\n"
                     "}\n";
 
-// Fraction of the snippet's keystrokes after which the screen is unreadable, so a decent typist
-// gets most of the way through before giving up.
-constexpr qreal StaminaFraction = 0.8;
+// Keystrokes, as a multiple of the snippet's length, after which the screen is unreadable even if
+// the code isn't finished. Leaves room for typos; finishing the code also ends the night.
+constexpr qreal StaminaFraction = 1.25;
 
 } // namespace
 
@@ -32,6 +32,8 @@ TypingSession::TypingSession(QObject *parent)
 
 qreal TypingSession::fatigue() const
 {
+    if (m_typedLength >= m_code.size())
+        return 1.0; // done, and done in
     return qMin(1.0, qreal(m_keystrokes) / m_requiredKeystrokes);
 }
 
