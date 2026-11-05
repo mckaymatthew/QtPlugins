@@ -49,11 +49,11 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 ## Phases
 
 ### Phase 0 — Toolchain & skeleton
-- [ ] `scripts/setup-linux.sh`: apt install `build-essential cmake ninja-build qt6-base-dev
+- [x] `scripts/setup-linux.sh`: apt install `build-essential cmake ninja-build qt6-base-dev
       qt6-declarative-dev qt6-quick3d-dev qml6-module-qtquick3d qml6-module-qtquick
       libgl1-mesa-dev mesa-utils xvfb` (+ any QML runtime modules found missing)
-- [ ] Top-level CMake project, empty `host`/`plugins`/`tests` subdirs, `.gitignore`
-- [ ] Verify a trivial Qt Quick 3D scene renders under `xvfb-run` (de-risks headless rendering early)
+- [x] Top-level CMake project, empty `host`/`plugins`/`tests` subdirs, `.gitignore`
+- [x] Verify a trivial Qt Quick 3D scene renders under `xvfb-run` (de-risks headless rendering early)
 - Commit
 
 ### Phase 1 — SDK + minimal host
