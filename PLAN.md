@@ -105,6 +105,26 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 - [ ] Build & run; verify Metal RHI backend renders the board, tune visuals/interaction
 - Commit
 
+### Iteration 2 — "Mustard and Mayonnaise" plugin (`plugins/mustardmayo/`)
+From `Plugin Iteration 2 Ideas.md`. Same architecture as tic-tac-toe: rules in a GPU-free C++
+library with unit tests, Qt Quick 3D scenes in QML compiled into the plugin.
+
+- [x] Core model (`mustardmayo_core`): `TypingSession` (type the shown C++, every keystroke adds
+      fatigue → blur; unreadable at full fatigue), `DrivingSession` (lane position between the
+      yellow and white lines, road curvature drift, random vision-blur episodes that disturb
+      steering, mustard/mayo warnings, progress only while in lane), `MustardMayoGame` (phase
+      state machine: work → drive → destination → home → asleep, or → burger → eat → work)
+- [x] Unit tests for all three
+- [ ] Blur post-effect: custom `ShaderEffect` with a `qt_add_shaders`-compiled shader (no extra
+      QML module dependency; works on Qt 6.4)
+- [ ] Scenes: office at night (monitor showing the code as a live texture, keyboard, out-of-focus
+      circuit cards and wires as a separately blurred layer), night drive (curved road, dashed
+      yellow / solid white lines, headlights, dashboard + steering wheel), road-sign fork,
+      house, burger joint, bedtime card
+- [ ] Smoke test driving every phase through real key input + screenshots
+- [ ] Host: give an opened extension keyboard focus
+- Commit after the model + tests, and again after the scenes + smoke test
+
 ### Phase 7 — Complex 3D game *(future)*
 - Separate plugin on the same interface; revisit interface needs then (e.g. host services,
   settings, input focus, lifecycle hooks like pause/resume) and bump the IID version if changed.

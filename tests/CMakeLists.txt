@@ -41,3 +41,7 @@ if(XVFB_RUN)
 elseif(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_test(NAME smoke_tictactoe COMMAND smoke_tictactoe)
 endif()
+
+qt_add_executable(tst_mustardmayo tst_mustardmayo.cpp)
+target_link_libraries(tst_mustardmayo PRIVATE mustardmayo_core Qt6::Test)
+add_test(NAME tst_mustardmayo COMMAND tst_mustardmayo)
