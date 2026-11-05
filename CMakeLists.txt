@@ -9,6 +9,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Widgets)
 qt_standard_project_setup()
 
+# Qt <= 6.5.3 always links the AGL framework, which newer macOS SDKs no longer ship
+# ("ld: framework 'AGL' not found"). Nothing uses it, so drop it from Qt's OpenGL target.
+if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
+    get_target_property(_qtplugins_gl_libs WrapOpenGL::WrapOpenGL INTERFACE_LINK_LIBRARIES)
+    if(_qtplugins_gl_libs)
+        list(FILTER _qtplugins_gl_libs EXCLUDE REGEX "AGL")
+        set_target_properties(WrapOpenGL::WrapOpenGL PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${_qtplugins_gl_libs}")
+    endif()
+endif()
+
 option(QTPLUGINS_BUILD_TESTS "Build unit tests" ON)
 
 # Every plugin's shared library is written here so the host can be pointed straight at it:

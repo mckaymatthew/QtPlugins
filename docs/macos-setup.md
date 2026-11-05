@@ -80,6 +80,9 @@ QSG_INFO=1 build/host/qtplugins-host.app/Contents/MacOS/qtplugins-host \
 
 ## Known risks on first macOS build
 
+- **`ld: framework 'AGL' not found`.** Qt ≤ 6.5.3 links the AGL framework, which newer Xcode SDKs
+  no longer include. The top-level `CMakeLists.txt` strips it out. If you still hit this error,
+  delete `build/` and configure again.
 - **Plugin file suffix.** CMake may name plugins `.so` rather than `.dylib` on macOS. The host
   accepts both.
 - **App bundle paths.** The installed host looks in `Contents/PlugIns/extensions`; in the build
