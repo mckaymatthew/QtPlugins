@@ -6,11 +6,13 @@ namespace {
 
 // Lane units: +-1 is a wheel on a line. With a 2.8 m lane and a 1.8 m car, one unit is 0.5 m.
 constexpr qreal SteerRate = 1.5;      // lane units per second at full lock
-constexpr qreal CurveDrift = 0.7;     // lane units per second pushed outward at full curvature
-constexpr qreal WobbleDrift = 0.6;    // extra drift while vision is blurred
-constexpr qreal BlurredSteering = 0.6;
+constexpr qreal CurveDrift = 1.45;    // lane units per second pushed outward at full curvature
+constexpr qreal WobbleDrift = 1.2;    // extra drift while vision is blurred
+constexpr qreal BlurredSteering = 0.4;
+constexpr qreal SteerResponse = 3.0;  // how quickly the wheel follows the keys (1/s)
+constexpr qreal OffRoadPenalty = 0.5; // progress lost over a line, relative to progress gained
 constexpr qreal MaxOffset = 1.8;      // car is fully across the line
-constexpr qreal EpisodeLength = 2.6;  // seconds
+constexpr qreal EpisodeLength = 3.2;  // seconds
 constexpr qreal WarningHold = 1.2;    // seconds a warning lingers after returning to the lane
 constexpr qreal NominalSpeed = 24.6;  // m/s, 55 mph
 
@@ -144,20 +146,19 @@ void DrivingSession::advance(qreal dt)
 
     // Steering: the wheel eases towards the held direction; blurred vision weakens it.
     const qreal target = (m_rightHeld ? 1 : 0) - (m_leftHeld ? 1 : 0);
-    m_steeringAngle += (target - m_steeringAngle) * qMin(1.0, dt * 6);
+    m_steeringAngle += (target - m_steeringAngle) * qMin(1.0, dt * SteerResponse);
     const qreal steering = m_steeringAngle * (1 - (1 - BlurredSteering) * m_blur);
     const qreal wobble = m_blur * WobbleDrift * qSin(2.3 * m_time + m_wobblePhase);
     const qreal velocity = steering * SteerRate - m_curvature * CurveDrift * speedFactor + wobble;
     m_lanePosition = qBound(-MaxOffset, m_lanePosition + velocity * dt, MaxOffset);
 
-    if (m_lanePosition < -1) {
-        setWarning(Mustard);
+    const qreal step = moved / (m_duration * NominalSpeed);
+    if (qAbs(m_lanePosition) > 1) {
+        setWarning(m_lanePosition < 0 ? Mustard : Mayo);
         m_warningHold = WarningHold;
-    } else if (m_lanePosition > 1) {
-        setWarning(Mayo);
-        m_warningHold = WarningHold;
+        m_progress = qMax(0.0, m_progress - step * OffRoadPenalty);
     } else {
-        m_progress = qMin(1.0, m_progress + moved / (m_duration * NominalSpeed));
+        m_progress = qMin(1.0, m_progress + step);
         m_warningHold -= dt;
         if (m_warningHold <= 0)
             setWarning(NoWarning);
@@ -219,7 +220,7 @@ void DrivingSession::tick()
 
 void DrivingSession::scheduleNextEpisode()
 {
-    m_nextEpisodeIn = 5.0 + m_random.bounded(5.0);
+    m_nextEpisodeIn = 3.0 + m_random.bounded(4.0);
 }
 
 void DrivingSession::setWarning(Warning warning)

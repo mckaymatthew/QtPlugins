@@ -10,7 +10,8 @@
 // lane centre, -1 puts the left wheels on the yellow centre line and +1 the right wheels on the
 // white edge line. Road curvature pushes the car outward (harder the faster it goes), the player
 // counters with left/right, the speed wanders, and every few seconds the driver's vision blurs and
-// steering gets unreliable. Progress home only accrues while the car is between the lines.
+// steering gets unreliable. Progress home only accrues while the car is between the lines, and
+// slips back while it's over one.
 class DrivingSession : public QObject
 {
     Q_OBJECT

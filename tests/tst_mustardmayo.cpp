@@ -168,7 +168,7 @@ private slots:
         QVERIFY(driving.warningText().contains("mustard"));
     }
 
-    void drivingNoProgressOutsideTheLane()
+    void drivingLosesProgressOutsideTheLane()
     {
         DrivingSession driving;
         driving.setSeed(1);
@@ -178,7 +178,8 @@ private slots:
         const qreal progress = driving.progress();
         const qreal distance = driving.distance();
         drive(driving, 1);
-        QCOMPARE(driving.progress(), progress);
+        QVERIFY(driving.lanePosition() > 1);
+        QVERIFY(driving.progress() < progress);
         QVERIFY(driving.distance() > distance); // the car still moves
     }
 
