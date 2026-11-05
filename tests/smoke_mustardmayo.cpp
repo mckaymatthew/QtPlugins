@@ -7,6 +7,7 @@
 
 #include <qtplugins/IExtension.h>
 
+#include <QKeyEvent>
 #include <QQmlContext>
 #include <QQuickItem>
 #include <QVBoxLayout>
@@ -141,13 +142,22 @@ private slots:
 
     void burger()
     {
+        // Still holding a steering key as the drive ends must not pick a destination: neither
+        // its auto-repeat nor a press in the first moment of the scene counts.
+        QKeyEvent repeat(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier, QString(), true);
+        QCoreApplication::sendEvent(m_view, &repeat);
+        QTest::keyClick(m_view, Qt::Key_Left);
+        QCOMPARE(phase(), QStringLiteral("destination"));
         settle();
+        QCoreApplication::sendEvent(m_view, &repeat);
+        QCOMPARE(phase(), QStringLiteral("destination"));
         expectRendered("mm-destination");
         QTest::keyClick(m_view, Qt::Key_Right); // the What-A-Burger exit
         QCOMPARE(phase(), QStringLiteral("burger"));
         settle();
         expectRendered("mm-burger");
 
+        m_game->setProperty("aftermathChance", 1.0);
         // Click through the photos with the on-screen button (bottom centre).
         const QPoint button(m_view->width() / 2, m_view->height() - 24 - 23);
         const int biteCount = m_game->property("biteCount").toInt();
@@ -160,7 +170,12 @@ private slots:
             }
         }
         QVERIFY(m_game->property("finishedEating").toBool());
-        QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button); // "Go back to work"
+        QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button); // "Go back to work"...
+        QTRY_VERIFY(m_game->property("aftermath").toBool());                 // ...but first, this
+        QCOMPARE(phase(), QStringLiteral("burger"));
+        settle(500);
+        expectRendered("mm-burger-aftermath");
+        QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button);
         QCOMPARE(phase(), QStringLiteral("work"));
         QCOMPARE(m_game->property("night").toInt(), 2);
     }
@@ -171,7 +186,7 @@ private slots:
         tire();
         invoke("goHome");
         finishDrive();
-        settle(300);
+        settle(); // the fork ignores keys for its first moment
         QTest::keyClick(m_view, Qt::Key_Left); // home
         QCOMPARE(phase(), QStringLiteral("home"));
         settle();

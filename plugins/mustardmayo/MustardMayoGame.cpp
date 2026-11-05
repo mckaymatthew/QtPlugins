@@ -1,5 +1,7 @@
 #include "MustardMayoGame.h"
 
+#include <QRandomGenerator>
+
 MustardMayoGame::MustardMayoGame(QObject *parent)
     : QObject(parent)
 {
@@ -75,6 +77,14 @@ bool MustardMayoGame::backToWork()
 {
     if (m_phase != Phase::Burger || !finishedEating())
         return false;
+    if (!m_aftermathRolled) {
+        m_aftermathRolled = true;
+        if (QRandomGenerator::global()->generateDouble() < m_aftermathChance) {
+            m_aftermath = true;
+            emit bitesChanged();
+            return false;
+        }
+    }
     ++m_night;
     emit nightChanged();
     m_typing.reset();
@@ -104,8 +114,21 @@ void MustardMayoGame::setPhase(Phase phase)
     emit phaseChanged();
 }
 
+void MustardMayoGame::setAftermathChance(qreal chance)
+{
+    chance = qBound(0.0, chance, 1.0);
+    if (qFuzzyCompare(m_aftermathChance + 1, chance + 1))
+        return;
+    m_aftermathChance = chance;
+    emit aftermathChanceChanged();
+}
+
 void MustardMayoGame::setBites(int bites)
 {
+    if (bites == 0) {
+        m_aftermathRolled = false;
+        m_aftermath = false;
+    }
     if (m_bites == bites)
         return;
     m_bites = bites;

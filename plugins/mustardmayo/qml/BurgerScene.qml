@@ -147,7 +147,8 @@ Item {
                 readonly property real aspect: implicitHeight > 0 ? implicitWidth / implicitHeight : 16 / 9
                 anchors.fill: parent
                 anchors.margins: 2
-                source: scene.bites > 0 ? "assets/whataburger%1.jpg".arg(scene.bites - 1) : ""
+                source: game.aftermath ? "assets/whataburger7.jpg"
+                      : scene.bites > 0 ? "assets/whataburger%1.jpg".arg(scene.bites - 1) : ""
                 fillMode: Image.PreserveAspectCrop
                 smooth: true
                 mipmap: true

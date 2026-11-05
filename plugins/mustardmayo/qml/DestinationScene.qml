@@ -6,7 +6,14 @@ Item {
     id: scene
     focus: true
 
+    // Only a deliberate choice counts: the player is usually still holding a steering key when the
+    // drive ends, so ignore auto-repeat and anything pressed in the first moment of this scene.
+    property bool armed: false
+    Timer { interval: 600; running: true; onTriggered: scene.armed = true }
+
     Keys.onPressed: (event) => {
+        if (event.isAutoRepeat || !scene.armed)
+            return
         if (event.key === Qt.Key_Left || event.key === Qt.Key_A) {
             game.chooseHome()
             event.accepted = true

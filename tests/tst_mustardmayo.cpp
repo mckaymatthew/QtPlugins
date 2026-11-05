@@ -355,6 +355,7 @@ private slots:
     void gameBurgerPathLoopsBackToWork()
     {
         MustardMayoGame game;
+        game.setAftermathChance(0);
         QSignalSpy bites(&game, &MustardMayoGame::bitesChanged);
         typeUntilUnreadable(*game.typing());
         QVERIFY(game.goHome());
@@ -381,6 +382,28 @@ private slots:
         game.restart();
         QCOMPARE(game.night(), 1);
         QCOMPARE(game.bites(), 0);
+    }
+
+    void gameAftermathShowsBeforeLeaving()
+    {
+        MustardMayoGame game;
+        game.setAftermathChance(1);
+        for (int visit = 0; visit < 2; ++visit) {
+            typeUntilUnreadable(*game.typing());
+            QVERIFY(game.goHome());
+            game.driving()->stop();
+            game.driving()->setDuration(0.5);
+            drive(*game.driving(), 1);
+            QVERIFY(game.chooseBurger());
+            QVERIFY(!game.aftermath()); // fresh each visit
+            while (game.eat()) {}
+
+            QVERIFY(!game.backToWork()); // first click reveals the aftermath instead
+            QVERIFY(game.aftermath());
+            QCOMPARE(game.phaseName(), QStringLiteral("burger"));
+            QVERIFY(game.backToWork());
+            QCOMPARE(game.phaseName(), QStringLiteral("work"));
+        }
     }
 };
 

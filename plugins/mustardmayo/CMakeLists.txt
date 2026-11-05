@@ -35,7 +35,7 @@ qt_add_resources(mustardmayo mustardmayo_assets
     FILES
         assets/whataburger0.jpg assets/whataburger1.jpg assets/whataburger2.jpg
         assets/whataburger3.jpg assets/whataburger4.jpg assets/whataburger5.jpg
-        assets/whataburger6.jpg)
+        assets/whataburger6.jpg assets/whataburger7.jpg)
 qt_add_shaders(mustardmayo mustardmayo_shaders
     PREFIX /qtplugins/mustardmayo
     FILES shaders/blur.frag)
