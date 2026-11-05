@@ -28,6 +28,24 @@ exactly that configuration on every push. Build the host and every extension wit
 
 ## 2. Build and test
 
+### The easy way: `scripts\build-windows.ps1`
+
+From any PowerShell prompt (no Developer prompt needed):
+
+```powershell
+scripts\build-windows.ps1 -Test                 # configure, build, run the tests
+scripts\build-windows.ps1 -Test -Deploy -Run    # ...then deploy to dist\ and launch the game
+scripts\build-windows.ps1 -QtDir D:\Qt\6.5.3\msvc2019_64 -Config Debug -Clean
+Get-Help scripts\build-windows.ps1 -Detailed    # all options
+```
+
+The script finds the MSVC 2019 (v142) toolset through `vswhere`, loads its x64 environment, checks
+that `cl` is 19.29 for x64, and finds Qt under `C:\Qt` (or uses `-QtDir`). If PowerShell refuses to
+run scripts, use `powershell -ExecutionPolicy Bypass -File scripts\build-windows.ps1 -Test`. CI
+builds through this script, under both PowerShell 7 and Windows PowerShell 5.1.
+
+### By hand
+
 Open a prompt set up for the MSVC 2019 x64 compiler:
 
 - **VS 2019:** *x64 Native Tools Command Prompt for VS 2019*.

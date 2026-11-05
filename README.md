@@ -29,7 +29,9 @@ cmake/QtPluginsExtension.cmake       qtplugins_add_extension() helper
 
 ## Building
 
-Requires Qt 6.4+ (Core, Gui, Widgets, Quick, Quick3D, Test), CMake ≥ 3.22 and Ninja.
+Requires Qt 6.4+ (Core, Gui, Widgets, Quick, Quick3D, Test), CMake ≥ 3.22 and Ninja. On Windows,
+`scripts\build-windows.ps1 -Test` does everything below. See
+[docs/windows-setup.md](docs/windows-setup.md).
 
 ```bash
 scripts/setup-linux.sh                       # Ubuntu 24.04: installs Qt 6.4.2 + tools via apt

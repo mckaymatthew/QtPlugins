@@ -21,35 +21,17 @@ jobs:
           modules: 'qtquick3d qtshadertools qtquicktimeline'
           cache: true
 
-      - name: Set up MSVC 2019 (v142 toolset, x64)
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-          toolset: '14.29'
-
-      - name: Check the compiler is MSVC 2019
+      # The build script finds VS's MSVC 2019 (v142) toolset itself, so this also tests the script.
+      - name: Build, test and deploy (scripts/build-windows.ps1)
         shell: pwsh
-        run: |
-          $banner = (cl 2>&1 | Out-String)
-          Write-Output $banner
-          if ($banner -notmatch 'Version 19\.29\.' -or $banner -notmatch 'for x64') {
-            throw "expected MSVC 2019 (19.29) for x64"
-          }
-
-      - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Test
         env:
           # No GPU on the runner: render through Direct3D's WARP software rasterizer.
           QSG_RHI_PREFER_SOFTWARE_RENDERER: '1'
-        run: ctest --test-dir build --output-on-failure
+        run: ./scripts/build-windows.ps1 -QtDir $env:QT_ROOT_DIR -Test -Deploy
 
-      - name: Install and deploy
-        run: cmake --install build --prefix dist
+      - name: Same script under Windows PowerShell 5.1 (configure + build only)
+        shell: powershell
+        run: ./scripts/build-windows.ps1 -QtDir $env:QT_ROOT_DIR -BuildDir build-ps51
 
       - name: Check the deployed folder runs without Qt installed
         shell: pwsh
