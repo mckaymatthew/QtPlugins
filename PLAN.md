@@ -73,10 +73,10 @@ Build output: all plugins go to `build/extensions/` so the host can be pointed s
 - Commit
 
 ### Phase 3 — Tic-tac-toe game logic
-- [ ] `GameModel` (QObject): 3×3 board, current player, `play(index)`, winner/draw detection,
+- [x] `GameModel` (QObject): 3×3 board, current player, `play(index)`, winner/draw detection,
       `reset()`, `Q_PROPERTY`s + signals for QML
-- [ ] Simple AI opponent option (random or minimax) — optional, nice for single-player demo
-- [ ] Unit tests for all win lines, draw, illegal moves, reset
+- [x] Simple AI opponent option (random or minimax) — optional, nice for single-player demo
+- [x] Unit tests for all win lines, draw, illegal moves, reset
 - Commit
 
 ### Phase 4 — 3D board plugin

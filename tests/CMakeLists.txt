@@ -20,3 +20,7 @@ target_compile_definitions(tst_extensionmanager PRIVATE
 add_dependencies(tst_extensionmanager hello fixture_wrongiid fixture_badapi fixture_notaplugin)
 add_test(NAME tst_extensionmanager COMMAND tst_extensionmanager)
 set_tests_properties(tst_extensionmanager PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+qt_add_executable(tst_gamemodel tst_gamemodel.cpp)
+target_link_libraries(tst_gamemodel PRIVATE tictactoe_core Qt6::Test)
+add_test(NAME tst_gamemodel COMMAND tst_gamemodel)
