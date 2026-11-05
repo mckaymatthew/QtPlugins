@@ -11,8 +11,9 @@ Item {
     readonly property real laneHalfWidth: 140
     readonly property real carHalfWidth: 90
     readonly property real carX: driving.lanePosition * (laneHalfWidth - carHalfWidth)
-    readonly property real sliceLength: 1200
-    readonly property int sliceCount: 16
+    readonly property real sliceLength: 600 // short slices keep sharp bends smooth
+    readonly property int sliceCount: 32
+    readonly property int firstSlice: Math.floor(driving.distance * 100 / sliceLength)
 
     function setKey(key, held) {
         if (key === Qt.Key_Left || key === Qt.Key_A) {
@@ -91,14 +92,16 @@ Item {
                     readonly property real ahead: -zCentre / 100 + 0 * scene.driving.distance
                     position: Qt.vector3d(scene.driving.roadOffsetAt(ahead) * 100, 0, zCentre)
                     eulerRotation.y: -scene.driving.roadHeadingAt(ahead) * 180 / Math.PI
+                    readonly property int worldSlice: scene.firstSlice + index
 
                     Model { // asphalt: oncoming lane, our lane and a shoulder
                         source: "#Cube"
                         position: Qt.vector3d(-90, -1, 0)
-                        scale: Qt.vector3d(7.0, 0.02, scene.sliceLength / 100 + 0.1)
+                        scale: Qt.vector3d(7.0, 0.02, scene.sliceLength / 100 + 0.6)
                         materials: PrincipledMaterial { baseColor: "#26272b"; roughness: 0.9 }
                     }
-                    Model { // yellow dash (3 m dash, 9 m gap)
+                    Model { // yellow dash (3 m dash, 9 m gap: every other slice)
+                        visible: parent.worldSlice % 2 === 0
                         source: "#Cube"
                         position: Qt.vector3d(-scene.laneHalfWidth, 0.5, scene.sliceLength / 2 - 150)
                         scale: Qt.vector3d(0.12, 0.01, 3)
@@ -110,7 +113,7 @@ Item {
                     Model { // solid white edge line
                         source: "#Cube"
                         position: Qt.vector3d(scene.laneHalfWidth, 0.5, 0)
-                        scale: Qt.vector3d(0.12, 0.01, scene.sliceLength / 100)
+                        scale: Qt.vector3d(0.12, 0.01, scene.sliceLength / 100 + 0.3)
                         materials: PrincipledMaterial {
                             baseColor: "#eeeeee"
                             emissiveFactor: Qt.vector3d(0.2, 0.2, 0.2)
@@ -119,10 +122,11 @@ Item {
                     Model { // far edge line of the oncoming lane
                         source: "#Cube"
                         position: Qt.vector3d(-3 * scene.laneHalfWidth, 0.5, 0)
-                        scale: Qt.vector3d(0.12, 0.01, scene.sliceLength / 100)
+                        scale: Qt.vector3d(0.12, 0.01, scene.sliceLength / 100 + 0.3)
                         materials: PrincipledMaterial { baseColor: "#bbbbbb" }
                     }
-                    Node { // reflector post
+                    Node { // reflector post, every 24 m
+                        visible: parent.worldSlice % 4 === 0
                         position: Qt.vector3d(scene.laneHalfWidth + 190, 0, 0)
                         Model {
                             source: "#Cube"

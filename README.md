@@ -6,9 +6,11 @@ from a directory. There are two example extensions, both rendered with Qt Quick 
 - **Tic-tac-toe** on a 3D board, against a friend or the computer.
 - **Mustard and Mayonnaise**, a three-phase game:
   1. At work late at night, type C++ until you're too tired to read it.
-  2. Drive home and keep the car between the yellow line ("Get out the mustard!") and the white
-     line ("Stay off the mayo!") while your vision keeps blurring.
-  3. Go home to bed, or stop at What-A-Burger and head back to work.
+  2. Drive home on a winding road at a wandering speed. Keep the car between the yellow line
+     ("Get out the mustard!") and the white line ("Stay off the mayo!") while your vision keeps
+     blurring.
+  3. Go home to bed, or stop at What-A-Burger for a cheeseburger you may not want to look at too
+     closely, then head back to work.
 
 ![Tic-tac-toe extension](docs/tictactoe.png)
 ![Mustard and Mayonnaise extension](docs/mustardmayo.png)
@@ -19,6 +21,7 @@ host/                                example host: ExtensionManager (reusable) +
 plugins/hello/                       smallest possible extension
 plugins/tictactoe/                   GameModel (rules + minimax AI) and the 3D QML board
 plugins/mustardmayo/                 typing/driving/phase models, six 3D scenes, a blur shader
+scripts/generate_burger_textures.py  regenerates the burger's pitted textures (plugins/mustardmayo/assets)
 tests/                               unit tests + an Xvfb rendering smoke test
 cmake/QtPluginsExtension.cmake       qtplugins_add_extension() helper
 ```

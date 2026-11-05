@@ -50,6 +50,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure   # unit tests (offscreen) + 3D smoke test (xvfb-run)
 build/host/qtplugins-host --extensions-dir build/extensions [--open org.qtplugins.tictactoe]
 cmake --install build --prefix <dir>         # bin/qtplugins-host + bin/extensions/*.so
+scripts/generate_burger_textures.py plugins/mustardmayo/assets   # regenerate burger textures
 ```
 
 The smoke tests save screenshots to `build/tests/smoke-*.png` (tic-tac-toe) and

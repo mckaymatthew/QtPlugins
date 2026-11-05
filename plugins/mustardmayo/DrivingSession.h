@@ -8,9 +8,9 @@
 
 // Phase 2, the drive home. The car's lateral position in its lane is `lanePosition`: 0 is the
 // lane centre, -1 puts the left wheels on the yellow centre line and +1 the right wheels on the
-// white edge line. Road curvature pushes the car outward, the player counters with left/right,
-// and every few seconds the driver's vision blurs and steering gets unreliable. Progress home only
-// accrues while the car is between the lines.
+// white edge line. Road curvature pushes the car outward (harder the faster it goes), the player
+// counters with left/right, the speed wanders, and every few seconds the driver's vision blurs and
+// steering gets unreliable. Progress home only accrues while the car is between the lines.
 class DrivingSession : public QObject
 {
     Q_OBJECT
@@ -20,7 +20,7 @@ class DrivingSession : public QObject
     Q_PROPERTY(qreal distance READ distance NOTIFY updated)
     Q_PROPERTY(qreal progress READ progress NOTIFY updated)
     Q_PROPERTY(qreal blur READ blur NOTIFY updated)
-    Q_PROPERTY(qreal speed READ speed CONSTANT)
+    Q_PROPERTY(qreal speed READ speed NOTIFY updated)
     Q_PROPERTY(qreal duration READ duration WRITE setDuration NOTIFY durationChanged)
     Q_PROPERTY(Warning warning READ warning NOTIFY warningChanged)
     Q_PROPERTY(QString warningText READ warningText NOTIFY warningChanged)
@@ -38,8 +38,8 @@ public:
     qreal distance() const { return m_distance; }           // metres driven
     qreal progress() const { return m_progress; }           // 0 .. 1
     qreal blur() const { return m_blur; }                   // 0 .. 1
-    qreal speed() const { return 24.6; }                    // m/s, 55 mph
-    qreal duration() const { return m_duration; }           // seconds of in-lane driving needed
+    qreal speed() const { return m_speed; }                 // m/s, wanders around 55 mph
+    qreal duration() const { return m_duration; }           // seconds in lane at 55 mph to get home
     void setDuration(qreal seconds);
     Warning warning() const { return m_warning; }
     QString warningText() const;
@@ -57,7 +57,7 @@ public:
     void start();
     void stop();
     void reset();
-    void setSeed(quint32 seed) { m_random.seed(seed); }
+    void setSeed(quint32 seed);
 
     // Advances the simulation by `dt` seconds. Called by the internal timer while running;
     // public so tests can step deterministically.
@@ -71,7 +71,8 @@ signals:
     void finished();
 
 private:
-    static qreal curvatureAt(qreal time);
+    static qreal curvatureAt(qreal distance);
+    qreal speedAt(qreal time) const;
     void tick();
     void scheduleNextEpisode();
     void setWarning(Warning warning);
@@ -83,6 +84,8 @@ private:
     bool m_leftHeld = false;
     bool m_rightHeld = false;
     qreal m_time = 0;
+    qreal m_speed = 0;
+    qreal m_speedPhase[2] = {0, 0};
     qreal m_lanePosition = 0;
     qreal m_steeringAngle = 0;
     qreal m_curvature = 0;

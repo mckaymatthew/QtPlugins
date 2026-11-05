@@ -148,9 +148,9 @@ private slots:
         settle();
         expectRendered("mm-burger");
 
-        m_game->setProperty("eatDuration", 600);
+        m_game->setProperty("eatDuration", 2500);
         invoke("eat");
-        QTest::qWait(300);
+        QTest::qWait(1200); // close-up fades in and the burger grows into view
         expectRendered("mm-burger-eating");
         QTRY_COMPARE(m_game->property("eatingProgress").toReal(), 1.0);
         invoke("backToWork");

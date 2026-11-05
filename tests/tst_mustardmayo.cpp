@@ -216,8 +216,9 @@ private slots:
     void drivingFinishes()
     {
         DrivingSession driving;
+        driving.setSeed(1);
         QSignalSpy finished(&driving, &DrivingSession::finished);
-        driving.setDuration(1);
+        driving.setDuration(0.5); // under 0.8 s even at the slowest speed, too short to drift out
         drive(driving, 1.2);
         QCOMPARE(driving.progress(), 1.0);
         QCOMPARE(finished.count(), 1);
@@ -230,8 +231,9 @@ private slots:
     {
         // The road drawn ahead must be the road driven: d(offset)/dd = heading, and
         // d(heading)/dd = the curvature the car meets after driving that far.
-        constexpr qreal RoadCurvature = 0.004; // DrivingSession.cpp
+        constexpr qreal RoadCurvature = 0.012; // DrivingSession.cpp
         DrivingSession now;
+        now.setSeed(1);
         drive(now, 3);
         QCOMPARE(now.roadOffsetAt(0), 0.0);
         QCOMPARE(now.roadHeadingAt(0), 0.0);
@@ -241,7 +243,8 @@ private slots:
             const qreal slope = (now.roadOffsetAt(ahead + h) - now.roadOffsetAt(ahead - h)) / (2 * h);
             QVERIFY(qAbs(slope - now.roadHeadingAt(ahead)) < 1e-4);
 
-            DrivingSession later; // same clock as `now`, then exactly `ahead` metres further
+            DrivingSession later; // same drive as `now`, then exactly `ahead` metres further
+            later.setSeed(1);
             drive(later, 3);
             later.advance(ahead / later.speed());
             const qreal turn = (now.roadHeadingAt(ahead + h) - now.roadHeadingAt(ahead - h)) / (2 * h);
@@ -249,6 +252,20 @@ private slots:
                      qPrintable(QStringLiteral("%1 m: %2 vs %3").arg(ahead).arg(turn)
                                     .arg(RoadCurvature * later.curvature())));
         }
+    }
+
+    void drivingSpeedVaries()
+    {
+        DrivingSession driving;
+        driving.setSeed(3);
+        qreal slowest = 1e9, fastest = 0;
+        for (int i = 0; i < 60 * 60; ++i) {
+            driving.advance(1.0 / 60);
+            slowest = qMin(slowest, driving.speed());
+            fastest = qMax(fastest, driving.speed());
+        }
+        QVERIFY2(slowest > 15 && fastest < 34, qPrintable(QStringLiteral("%1..%2").arg(slowest).arg(fastest)));
+        QVERIFY2(fastest - slowest > 8, "speed hardly changes");
     }
 
     void drivingIsBeatable()

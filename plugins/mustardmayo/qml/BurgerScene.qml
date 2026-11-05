@@ -119,9 +119,53 @@ Item {
         }
     }
 
+    // Close-up of the cheeseburger once it arrives.
+    Item {
+        id: closeUp
+        anchors.fill: parent
+        visible: scene.progress > 0
+        opacity: visible ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 400 } }
+
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#e0100c08" }
+                GradientStop { position: 1.0; color: "#f0000000" }
+            }
+        }
+
+        View3D {
+            anchors.fill: parent
+            environment: SceneEnvironment {
+                backgroundMode: SceneEnvironment.Transparent
+                antialiasingMode: SceneEnvironment.MSAA
+                antialiasingQuality: SceneEnvironment.High
+            }
+
+            PerspectiveCamera { position: Qt.vector3d(0, 135, 240); eulerRotation.x: -22; fieldOfView: 45 }
+            DirectionalLight { eulerRotation: Qt.vector3d(-45, -30, 0); brightness: 1.2; color: "#fff1dc"; castsShadow: true }
+            DirectionalLight { eulerRotation: Qt.vector3d(-10, 150, 0); brightness: 0.5; color: "#9fb4ff" } // rim
+            PointLight { position: Qt.vector3d(0, 160, 120); brightness: 0.6; color: "#ffd9a0" }
+
+            Burger {
+                y: 10
+                scale: Qt.vector3d(grow, grow, grow)
+                property real grow: closeUp.visible ? 1 : 0.2
+                Behavior on grow { NumberAnimation { duration: 600; easing.type: Easing.OutBack } }
+                NumberAnimation on eulerRotation.y {
+                    from: 0; to: 360; duration: 16000
+                    loops: Animation.Infinite
+                    running: closeUp.visible
+                }
+            }
+        }
+    }
+
     Text {
         anchors { top: parent.top; horizontalCenter: parent.horizontalCenter; topMargin: 24 }
-        text: scene.progress >= 1 ? qsTr("That hit the spot. It's 2 AM…")
+        text: scene.progress > 0 && scene.progress < 1 ? qsTr("One cheeseburger. Look closer.")
+            : scene.progress >= 1 ? qsTr("That hit the spot. It's 2 AM…")
                                   : qsTr("What-A-Burger. Open 24 hours.")
         color: "white"
         font { pixelSize: 26; bold: true }
