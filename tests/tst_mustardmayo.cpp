@@ -75,67 +75,40 @@ private slots:
         QCOMPARE(typing.keystrokes(), 0);
     }
 
-    void typingFirstLineBringsTheFirstEmail()
+    void typingEnterAndAutoIndent()
     {
         TypingSession typing;
-        QSignalSpy emails(&typing, &TypingSession::requirementChanged);
-        const int firstLine = typing.code().indexOf('\n') + 1;
-        while (typing.typedLength() < firstLine && emails.isEmpty())
+        const QString code = typing.code();
+        const int secondLine = code.indexOf('\n') + 1;
+        while (typing.typedLength() < secondLine)
             QVERIFY(typeNext(typing));
-
-        QCOMPARE(emails.count(), 1);
-        QCOMPARE(typing.email(), QStringLiteral("Actually, errantFlight() should be less than 0.9."));
-        QVERIFY(typing.code().contains("errantFlight() < 0.9;"));
-        QCOMPARE(typing.typedLength(), 0); // half of one finished line: back to the start
-        QCOMPARE(typing.keystrokes(), firstLine); // ...but the night doesn't rewind
-
-        // Finishing the same line again brings no new email; indentation is still filled in.
-        while (typing.typedLength() < firstLine)
-            QVERIFY(typeNext(typing));
-        QCOMPARE(emails.count(), 1);
-        QCOMPARE(typing.code().mid(typing.typedLength(), 2), QStringLiteral("if"));
+        // The four spaces of indentation were filled in.
+        QCOMPARE(code.mid(typing.typedLength(), 6), QStringLiteral("return"));
     }
 
-    void typingRewritesNeverKeepAChangedLine()
+    void typingFinishingTheCodeEndsTheNight()
     {
         TypingSession typing;
-        QString before = typing.code();
-        int typedBefore = 0;
-        connect(&typing, &TypingSession::requirementChanged, this, [&] {
-            QVERIFY(typing.typedLength() < typedBefore);       // progress fell back...
-            QCOMPARE(typing.code().left(typing.typedLength()),  // ...to text that still holds
-                     before.left(typing.typedLength()));
-        });
-        while (!typing.isUnreadable()) {
-            before = typing.code();
-            typedBefore = typing.typedLength() + 1;
-            QVERIFY(typeNext(typing));
-        }
-    }
-    void typingRequirementsOutlastTheNight()
-    {
-        TypingSession typing;
-        QSignalSpy emails(&typing, &TypingSession::requirementChanged);
         qreal last = 0;
         while (!typing.isUnreadable()) {
             QVERIFY(typeNext(typing));
-            QVERIFY(typing.fatigue() >= last); // resets never refill the night
+            QVERIFY(typing.fatigue() >= last);
             last = typing.fatigue();
         }
-        // A clean typist sees most of the requirement changes but never gets to finish.
-        QCOMPARE(emails.count(), 3);
-        QVERIFY(typing.typedLength() < typing.code().size());
-        QVERIFY(typing.code().contains("errantFlight() < 0.95;"));
-        QVERIFY(typing.code().contains("sensorsNominal()"));
+        // A clean run stays readable to the very last character.
+        QCOMPARE(typing.typedLength(), int(typing.code().size()));
+        QCOMPARE(typing.fatigue(), 1.0);
     }
-    void typingStaysFreshThroughTheFirstEmails()
+
+    void typingStaysFreshForTheFirstLine()
     {
         TypingSession typing;
-        QSignalSpy emails(&typing, &TypingSession::requirementChanged);
-        while (emails.count() < 2)
+        const int secondLine = typing.code().indexOf('\n') + 1;
+        while (typing.typedLength() < secondLine)
             QVERIFY(typeNext(typing));
-        QVERIFY2(typing.fatigue() < 0.7, qPrintable(QString::number(typing.fatigue())));
+        QVERIFY2(typing.fatigue() < 0.5, qPrintable(QString::number(typing.fatigue())));
     }
+
     void typingMashingKeysAlsoTires()
     {
         TypingSession typing;
@@ -149,13 +122,10 @@ private slots:
     {
         TypingSession typing;
         typeUntilUnreadable(typing);
-        const QString original = TypingSession().code();
         typing.reset();
         QCOMPARE(typing.typedLength(), 0);
         QCOMPARE(typing.keystrokes(), 0);
         QVERIFY(!typing.isUnreadable());
-        QCOMPARE(typing.code(), original);
-        QVERIFY(typing.email().isEmpty());
     }
 
     // --- DrivingSession ------------------------------------------------------------------

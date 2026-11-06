@@ -5,9 +5,7 @@ from a directory. There are two example extensions, both rendered with Qt Quick 
 
 - **Tic-tac-toe** on a 3D board, against a friend or the computer.
 - **Mustard and Mayonnaise**, a three-phase game:
-  1. At work late at night, type C++ until you're too tired to read it. Every finished line
-     brings an email that changes the requirements, rewrites the code and knocks your progress
-     back.
+  1. At work late at night, type a few lines of C++ before you're too tired to read them.
   2. Drive home on a winding road at a wandering speed. Keep the car between the yellow line
      ("Get out the mustard!") and the white line ("Stay off the mayo!") while your vision keeps
      blurring.

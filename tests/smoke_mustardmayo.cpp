@@ -105,18 +105,6 @@ private slots:
         settle(300);
         expectRendered("mm-work");
 
-        // Finishing the first line brings an email that rewrites the code.
-        typeKeys("light(Algorithms &a) {");
-        QTest::keyClick(m_view, Qt::Key_Return);
-        QObject *toast = m_view->rootObject()->findChild<QObject *>("emailToast");
-        QVERIFY(toast);
-        QTRY_VERIFY(toast->property("shown").toBool());
-        QVERIFY(toast->property("message").toString().contains("less than 0.9"));
-        QVERIFY(m_typing->property("code").toString().contains("errantFlight() < 0.9;"));
-        QCOMPARE(m_typing->property("typedLength").toInt(), 0);
-        settle(600);
-        expectRendered("mm-work-email");
-
         tire();
         settle(300);
         expectRendered("mm-work-unreadable");

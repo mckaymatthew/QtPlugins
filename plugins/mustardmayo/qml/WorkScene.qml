@@ -31,12 +31,6 @@ Item {
     Connections {
         target: scene.typing
         function onTypo() { scene.typoFlash = true; typoTimer.restart() }
-        function onRequirementChanged(email) {
-            emailToast.message = email
-            emailToast.shown = email.length > 0
-            if (emailToast.shown)
-                emailTimer.restart()
-        }
     }
     Timer { id: typoTimer; interval: 160; onTriggered: scene.typoFlash = false }
 
@@ -282,58 +276,5 @@ Item {
         text: qsTr("Go home")
         accent: "#2f7d32"
         onClicked: game.goHome()
-    }
-
-    // Requirement changes arrive as email notifications (crisp: they're outside the blurred world).
-    Rectangle {
-        id: emailToast
-        objectName: "emailToast"
-        property string message
-        property bool shown: false
-
-        width: Math.min(420, scene.width * 0.5)
-        height: emailColumn.implicitHeight + 28
-        y: 92
-        x: shown ? scene.width - width - 18 : scene.width + 24
-        Behavior on x { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
-        radius: 10
-        color: "#f7f8fa"
-        border.color: "#c9ced8"
-
-        Rectangle { // accent stripe
-            width: 6
-            height: parent.height
-            radius: 3
-            color: "#0a64d8"
-        }
-        Column {
-            id: emailColumn
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14; leftMargin: 22 }
-            spacing: 4
-            Text {
-                text: qsTr("New email · Program Manager")
-                color: "#5a6372"
-                font.pixelSize: 13
-            }
-            Text {
-                width: parent.width
-                text: qsTr("RE: Flight test code")
-                color: "#1b1f27"
-                font { pixelSize: 15; bold: true }
-                elide: Text.ElideRight
-            }
-            Text {
-                width: parent.width
-                text: emailToast.message
-                color: "#1b1f27"
-                font.pixelSize: 15
-                wrapMode: Text.Wrap
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: emailToast.shown = false
-        }
-        Timer { id: emailTimer; interval: 5000; onTriggered: emailToast.shown = false }
     }
 }
