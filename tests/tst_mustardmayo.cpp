@@ -409,6 +409,11 @@ private slots:
         QCOMPARE(game.bites(), 0);
     }
 
+    void gameAftermathDefaultChance()
+    {
+        QCOMPARE(MustardMayoGame().aftermathChance(), 0.25);
+    }
+
     void gameAftermathShowsBeforeLeaving()
     {
         MustardMayoGame game;

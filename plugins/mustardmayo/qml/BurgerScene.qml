@@ -153,6 +153,26 @@ Item {
                 smooth: true
                 mipmap: true
             }
+
+            Text { // the aftermath
+                objectName: "tummyMessage"
+                visible: game.aftermath
+                anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: parent.height * 0.08 }
+                width: parent.width * 0.9
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                text: qsTr("Your tummy hurts.")
+                color: "#fff3c4"
+                font { pixelSize: Math.max(30, parent.height * 0.1); bold: true }
+                style: Text.Outline
+                styleColor: "#d0000000"
+                SequentialAnimation on rotation { // queasy wobble
+                    running: game.aftermath
+                    loops: Animation.Infinite
+                    NumberAnimation { from: -2; to: 2; duration: 900; easing.type: Easing.InOutSine }
+                    NumberAnimation { from: 2; to: -2; duration: 900; easing.type: Easing.InOutSine }
+                }
+            }
         }
     }
 

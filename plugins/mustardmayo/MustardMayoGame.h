@@ -71,5 +71,5 @@ private:
     int m_bites = 0;
     bool m_aftermath = false;
     bool m_aftermathRolled = false;
-    qreal m_aftermathChance = 0.15;
+    qreal m_aftermathChance = 0.25;
 };

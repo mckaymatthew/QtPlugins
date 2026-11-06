@@ -192,6 +192,9 @@ private slots:
         QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button); // "Go back to work"...
         QTRY_VERIFY(m_game->property("aftermath").toBool());                 // ...but first, this
         QCOMPARE(phase(), QStringLiteral("burger"));
+        QObject *tummy = m_view->rootObject()->findChild<QObject *>("tummyMessage");
+        QVERIFY(tummy);
+        QVERIFY(tummy->property("visible").toBool());
         settle(500);
         expectRendered("mm-burger-aftermath");
         QTest::mouseClick(m_view, Qt::LeftButton, Qt::NoModifier, button);
