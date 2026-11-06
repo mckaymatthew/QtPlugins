@@ -28,7 +28,9 @@ qt_add_resources(mustardmayo mustardmayo_qml
         qml/HomeScene.qml
         qml/AsleepScene.qml
         qml/BurgerScene.qml
-        qml/Lightning.qml)
+        qml/Lightning.qml
+        qml/PowerSupply.qml
+        qml/TangledCable.qml)
 # Burger photos, one per bite, served as assets/* next to the QML. JPEG keeps the plugin small but
 # needs Qt's qjpeg image-format plugin at runtime (deployed by default by windeployqt/macdeployqt).
 qt_add_resources(mustardmayo mustardmayo_assets

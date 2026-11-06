@@ -72,15 +72,21 @@ Item {
             materials: PrincipledMaterial { baseColor: "#d4a531"; metalness: 1; roughness: 0.3 }
         }
     }
-    component Wire: Node {
-        id: wire
-        property real length: 60
-        property color color: "red"
+    component PowerBrick: Node { // a laptop-style power brick
         Model {
-            source: "#Cylinder"
-            eulerRotation.z: 90
-            scale: Qt.vector3d(0.008, wire.length / 100, 0.008)
-            materials: PrincipledMaterial { baseColor: wire.color; roughness: 0.4 }
+            source: "#Cube"
+            y: 1.6
+            scale: Qt.vector3d(0.065, 0.032, 0.12)
+            materials: PrincipledMaterial { baseColor: "#141416"; roughness: 0.5 }
+        }
+        Model { // status LED
+            source: "#Cube"
+            position: Qt.vector3d(0, 3.25, 4)
+            scale: Qt.vector3d(0.006, 0.002, 0.006)
+            materials: PrincipledMaterial {
+                baseColor: "#5cff6a"; emissiveFactor: Qt.vector3d(0.4, 1, 0.45)
+                lighting: PrincipledMaterial.NoLighting
+            }
         }
     }
 
@@ -125,11 +131,66 @@ Item {
                 CircuitCard { position: Qt.vector3d(50, 74.5, -48); eulerRotation.y: -28 }
                 CircuitCard { position: Qt.vector3d(30, 74.5, -72); eulerRotation.y: 8 }
 
-                Wire { position: Qt.vector3d(-30, 74.8, -30); eulerRotation.y: 25; length: 50; color: "#d63c3c" }
-                Wire { position: Qt.vector3d(-36, 74.8, -50); eulerRotation.y: -60; length: 40; color: "#2f6ad6" }
-                Wire { position: Qt.vector3d(40, 74.8, -35); eulerRotation.y: -35; length: 55; color: "#e0c020" }
-                Wire { position: Qt.vector3d(28, 74.8, -60); eulerRotation.y: 70; length: 45; color: "#202020" }
-                Wire { position: Qt.vector3d(-5, 74.8, -75); eulerRotation.y: 5; length: 70; color: "#d63c3c" }
+                // Bench supplies, feeding the cards through snarled test leads.
+                PowerSupply { position: Qt.vector3d(-68, 74, -74); eulerRotation.y: 15 }
+                TangledCable { from: Qt.vector3d(-56.4, 75.5, -65.3); to: Qt.vector3d(-48, 74.8, -44)
+                               loops: 4; loopRadius: 2.5; thickness: 0.5; color: "#d63c3c"; seed: 3 }
+                TangledCable { from: Qt.vector3d(-53.5, 75.5, -66.1); to: Qt.vector3d(-38, 75, -56)
+                               loops: 3; loopRadius: 2.2; thickness: 0.5; color: "#1a1a1a"; seed: 4 }
+                PowerSupply {
+                    position: Qt.vector3d(64, 74, -80); eulerRotation.y: -22
+                    voltageColor: "#ff6a1f"; currentColor: "#ff3b1f"
+                }
+                TangledCable { from: Qt.vector3d(70, 75.5, -70); to: Qt.vector3d(50, 74.8, -50)
+                               loops: 5; loopRadius: 3; thickness: 0.5; color: "#d63c3c"; seed: 5 }
+                TangledCable { from: Qt.vector3d(73, 75.5, -71); to: Qt.vector3d(30, 74.8, -70)
+                               loops: 6; loopRadius: 3; thickness: 0.5; color: "#1a1a1a"; seed: 6 }
+
+                Model { // power strip along the back, every socket taken
+                    source: "#Cube"
+                    position: Qt.vector3d(-5, 75.5, -84)
+                    scale: Qt.vector3d(0.5, 0.03, 0.05)
+                    materials: PrincipledMaterial { baseColor: "#e4e2dc"; roughness: 0.6 }
+                }
+                Repeater3D {
+                    model: 5
+                    Model { // plugs
+                        required property int index
+                        source: "#Cube"
+                        position: Qt.vector3d(-22 + index * 8, 78, -84)
+                        scale: Qt.vector3d(0.04, 0.035, 0.035)
+                        materials: PrincipledMaterial { baseColor: "#18181a"; roughness: 0.5 }
+                    }
+                }
+                Model { // its glowing switch
+                    source: "#Cube"
+                    position: Qt.vector3d(19, 77, -84)
+                    scale: Qt.vector3d(0.03, 0.01, 0.025)
+                    materials: PrincipledMaterial {
+                        baseColor: "#ff3020"; emissiveFactor: Qt.vector3d(1, 0.2, 0.1)
+                        lighting: PrincipledMaterial.NoLighting
+                    }
+                }
+                PowerBrick { position: Qt.vector3d(-74, 74, -20); eulerRotation.y: 35 }
+                PowerBrick { position: Qt.vector3d(76, 74, -32); eulerRotation.y: -50 }
+
+                // The cable nest: power cords, USB and network, all wound round each other.
+                TangledCable { from: Qt.vector3d(-22, 74, -84); to: Qt.vector3d(-74, 74, -20)
+                               loops: 9; loopRadius: 5; thickness: 0.8; color: "#141414"; seed: 11 }
+                TangledCable { from: Qt.vector3d(-14, 74, -84); to: Qt.vector3d(-60, 74, -64)
+                               loops: 6; loopRadius: 4; thickness: 0.9; color: "#141414"; seed: 12 }
+                TangledCable { from: Qt.vector3d(2, 74, -84); to: Qt.vector3d(76, 74, -32)
+                               loops: 10; loopRadius: 5; thickness: 0.8; color: "#141414"; seed: 13 }
+                TangledCable { from: Qt.vector3d(10, 74, -84); to: Qt.vector3d(58, 74, -76)
+                               loops: 4; loopRadius: 3; thickness: 0.9; color: "#141414"; seed: 14 }
+                TangledCable { from: Qt.vector3d(-80, 74, -50); to: Qt.vector3d(-28, 74, -28)
+                               loops: 8; loopRadius: 5; thickness: 0.6; color: "#2f6ad6"; seed: 21 }
+                TangledCable { from: Qt.vector3d(-62, 74, -10); to: Qt.vector3d(-30, 74, -70)
+                               loops: 7; loopRadius: 4; thickness: 0.5; color: "#9a9ca2"; seed: 22 }
+                TangledCable { from: Qt.vector3d(24, 74, -14); to: Qt.vector3d(86, 74, -58)
+                               loops: 8; loopRadius: 4.5; thickness: 0.6; color: "#e0c020"; seed: 23 }
+                TangledCable { from: Qt.vector3d(30, 74, -60); to: Qt.vector3d(82, 74, -12)
+                               loops: 7; loopRadius: 4; thickness: 0.5; color: "#e07020"; seed: 24 }
 
                 Model { // coffee mug, long cold
                     source: "#Cylinder"
