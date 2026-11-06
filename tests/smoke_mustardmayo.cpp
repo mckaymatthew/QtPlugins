@@ -129,6 +129,13 @@ private slots:
         settle();
         expectRendered("mm-drive");
 
+        // Lightning: strike now, and catch the flash.
+        QObject *lightning = m_view->rootObject()->findChild<QObject *>("lightning");
+        QVERIFY(lightning);
+        QVERIFY(QMetaObject::invokeMethod(lightning, "strike"));
+        QTRY_VERIFY_WITH_TIMEOUT(lightning->property("flash").toReal() > 0.8, 1000);
+        expectRendered("mm-drive-lightning");
+
         // Hold right until the car crosses the white line.
         QTest::keyPress(m_view, Qt::Key_Right);
         QTRY_VERIFY_WITH_TIMEOUT(lanePosition() > 1.05, 6000);

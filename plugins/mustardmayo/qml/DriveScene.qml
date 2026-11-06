@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick3D
+import QtQuick3D.Particles3D
 
-// Phase 2: the drive home at night. Keep the car between the yellow centre line (mustard) and the
+// Phase 2: the drive home at night, in a thunderstorm. Keep the car between the yellow centre line (mustard) and the
 // white edge line (mayo). Units are centimetres; the lane centre is x = 0.
 Item {
     id: scene
@@ -14,6 +15,19 @@ Item {
     readonly property real sliceLength: 600 // short slices keep sharp bends smooth
     readonly property int sliceCount: 32
     readonly property int firstSlice: Math.floor(driving.distance * 100 / sliceLength)
+    readonly property real flash: lightning.flash // 0..1 while lightning strikes
+
+    // Lightning every few seconds, at random.
+    Timer {
+        id: lightningTimer
+        interval: 2500 + Math.random() * 5000
+        running: true
+        onTriggered: {
+            lightning.strike()
+            interval = 4000 + Math.random() * 7000
+            restart()
+        }
+    }
 
     function setKey(key, held) {
         if (key === Qt.Key_Left || key === Qt.Key_A) {
@@ -35,26 +49,45 @@ Item {
         layer.enabled: scene.driving.blur > 0.02
         layer.effect: Blur { radius: scene.driving.blur * 16 * scene.height / 600 }
 
-        // Night sky behind the transparent 3D view.
+        // Stormy night sky behind the transparent 3D view.
         Rectangle {
             anchors.fill: parent
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#03050c" }
-                GradientStop { position: 0.55; color: "#101830" }
+                GradientStop { position: 0.0; color: "#05060a" }
+                GradientStop { position: 0.55; color: "#151a26" }
             }
-            Repeater {
-                model: 90
-                Rectangle {
-                    required property int index
-                    // Deterministic pseudo-random scatter in the upper half.
-                    x: ((index * 7919) % 1000) / 1000 * scene.width
-                    y: ((index * 104729) % 1000) / 1000 * scene.height * 0.45
-                    width: index % 7 === 0 ? 2.5 : 1.5
-                    height: width
-                    radius: width / 2
-                    color: "white"
-                    opacity: 0.35 + (index % 5) * 0.12
+            Canvas { // low, soft storm clouds
+                anchors.fill: parent
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+                onPaint: {
+                    const ctx = getContext("2d")
+                    ctx.reset()
+                    for (let i = 0; i < 70; ++i) { // deterministic scatter of soft puffs
+                        const x = ((i * 7919) % 1000) / 1000 * width
+                        const y = (((i * 104729) % 1000) / 1000) * height * 0.38
+                        const r = height * (0.08 + ((i * 31) % 10) / 70)
+                        const puff = ctx.createRadialGradient(x, y, 0, x, y, r)
+                        puff.addColorStop(0, "rgba(52, 58, 76, 0.45)")
+                        puff.addColorStop(1, "rgba(52, 58, 76, 0)")
+                        ctx.fillStyle = puff
+                        ctx.fillRect(x - r, y - r, 2 * r, 2 * r)
+                    }
                 }
+            }
+            Rectangle { // the whole sky lights up with each strike
+                anchors.fill: parent
+                opacity: scene.flash * 0.7
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#c8d0ff" }
+                    GradientStop { position: 0.55; color: "#40486a" }
+                }
+            }
+            Lightning {
+                id: lightning
+                objectName: "lightning"
+                anchors.fill: parent
+                horizon: scene.height * 0.5
             }
         }
 
@@ -65,10 +98,49 @@ Item {
                 antialiasingMode: SceneEnvironment.MSAA
             }
 
-            DirectionalLight { // moonlight
+            DirectionalLight { // what little light gets through the clouds
                 eulerRotation: Qt.vector3d(-35, 30, 0)
-                brightness: 0.4
+                brightness: 0.3
                 color: "#8a9ad0"
+            }
+            DirectionalLight { // lightning
+                eulerRotation: Qt.vector3d(-60, -20, 0)
+                brightness: scene.flash * 2.5
+                color: "#d4dcff"
+                visible: scene.flash > 0.01
+            }
+
+            // Rain, falling around the car and streaming past it.
+            ParticleSystem3D {
+                LineParticle3D {
+                    id: raindrop
+                    maxAmount: 2500
+                    color: "#c4d2ee"
+                    colorVariation: Qt.vector4d(0.05, 0.05, 0.05, 0.3)
+                    particleScale: 1.4
+                    length: 90
+                    segmentCount: 2
+                    alphaFade: 0.3
+                    billboard: true
+                    fadeInDuration: 60
+                    fadeOutDuration: 60
+                }
+                ParticleEmitter3D {
+                    particle: raindrop
+                    position: Qt.vector3d(scene.carX, 250, -2600)
+                    shape: ParticleShape3D {
+                        type: ParticleShape3D.Cube
+                        extents: Qt.vector3d(1000, 250, 2600)
+                    }
+                    emitRate: 3500
+                    lifeSpan: 650
+                    velocity: VectorDirection3D {
+                        // Down, and towards the car at its speed.
+                        direction: Qt.vector3d(-scene.driving.steeringAngle * 200, -900,
+                                               scene.driving.speed * 100)
+                        directionVariation: Qt.vector3d(30, 120, 150)
+                    }
+                }
             }
 
             Model { // fields either side
@@ -98,7 +170,8 @@ Item {
                         source: "#Cube"
                         position: Qt.vector3d(-90, -1, 0)
                         scale: Qt.vector3d(7.0, 0.02, scene.sliceLength / 100 + 0.6)
-                        materials: PrincipledMaterial { baseColor: "#26272b"; roughness: 0.9 }
+                        // wet: smooth enough to catch the headlights and the lightning
+                        materials: PrincipledMaterial { baseColor: "#1e1f23"; roughness: 0.35 }
                     }
                     Model { // yellow dash (3 m dash, 9 m gap: every other slice)
                         visible: parent.worldSlice % 2 === 0
@@ -232,6 +305,41 @@ Item {
                         }
                     }
                 }
+            }
+        }
+
+        // Drops landing on the windscreen and running off.
+        Repeater {
+            id: drops
+            model: 36
+            Rectangle {
+                required property int index
+                width: 4 + (index % 4) * 2
+                height: width * 1.2
+                radius: width / 2
+                color: "#305a6a8a"
+                border { color: "#60c8d8f0"; width: 1 }
+                opacity: 0
+                NumberAnimation on opacity {
+                    id: fade
+                    running: false
+                    from: 0.9; to: 0; duration: 1400; easing.type: Easing.InQuad
+                }
+                function land() {
+                    x = Math.random() * scene.width
+                    y = Math.random() * scene.height * 0.75
+                    fade.restart()
+                }
+            }
+        }
+        Timer {
+            interval: 70
+            repeat: true
+            running: true
+            property int next: 0
+            onTriggered: {
+                drops.itemAt(next).land()
+                next = (next + 1) % drops.count
             }
         }
     }
