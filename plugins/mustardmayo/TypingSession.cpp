@@ -32,9 +32,9 @@ const Change Changes[] = {
 };
 
 // Keystrokes, as a multiple of the original snippet's length, after which the screen is
-// unreadable. The requirement changes mean retyping lines, so this leaves room to see most of the
-// emails before the night ends; finishing the code ends it too.
-constexpr qreal StaminaFraction = 2.0;
+// unreadable. The requirement changes mean retyping lines; a clean typist sees three of the four
+// emails before the night ends. Finishing the code ends it too.
+constexpr qreal StaminaFraction = 1.4;
 
 } // namespace
 

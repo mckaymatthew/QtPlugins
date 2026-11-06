@@ -114,7 +114,7 @@ Item {
             ParticleSystem3D {
                 LineParticle3D {
                     id: raindrop
-                    maxAmount: 2500
+                    maxAmount: 5000
                     color: "#c4d2ee"
                     colorVariation: Qt.vector4d(0.05, 0.05, 0.05, 0.3)
                     particleScale: 1.4
@@ -132,7 +132,7 @@ Item {
                         type: ParticleShape3D.Cube
                         extents: Qt.vector3d(1000, 250, 2600)
                     }
-                    emitRate: 3500
+                    emitRate: 7000
                     lifeSpan: 650
                     velocity: VectorDirection3D {
                         // Down, and towards the car at its speed.

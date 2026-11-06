@@ -92,7 +92,7 @@ private:
     qreal m_curvature = 0;
     qreal m_distance = 0;
     qreal m_progress = 0;
-    qreal m_duration = 40;
+    qreal m_duration = 28;
     qreal m_blur = 0;
     qreal m_nextEpisodeIn = 0;
     qreal m_episodeTime = -1; // < 0 when not in a blur episode
