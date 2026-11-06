@@ -50,7 +50,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure   # unit tests (offscreen) + 3D smoke test (xvfb-run)
 build/host/qtplugins-host --extensions-dir build/extensions [--open org.qtplugins.tictactoe]
 cmake --install build --prefix <dir>         # bin/qtplugins-host + bin/extensions/*.so
-scripts\build-windows.ps1 -Test -Deploy      # Windows: MSVC 2019 x64 build (see docs/windows-setup.md)
+scripts\build-windows.ps1 -Test -Deploy      # Windows: MSVC 2019 x64 build; add -Software for WARP (see docs/windows-setup.md)
 ```
 
 The smoke tests save screenshots to `build/tests/smoke-*.png` (tic-tac-toe) and

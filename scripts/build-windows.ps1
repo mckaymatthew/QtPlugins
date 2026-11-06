@@ -39,12 +39,19 @@
 .PARAMETER Open
     Extension id to open with -Run. Default: org.qtplugins.mustardmayo.
 
+.PARAMETER Software
+    Render the tests and -Run with Direct3D 11's built-in software rasterizer (WARP) instead of the
+    GPU. Use it in VMs or on machines whose graphics driver is missing or broken. Nothing extra
+    needs installing: WARP ships with Windows.
+
 .EXAMPLE
     scripts\build-windows.ps1 -Test
 .EXAMPLE
     scripts\build-windows.ps1 -QtDir D:\Qt\6.5.3\msvc2019_64 -Config Debug -Run
 .EXAMPLE
     scripts\build-windows.ps1 -Clean -Test -Deploy
+.EXAMPLE
+    scripts\build-windows.ps1 -Test -Run -Software
 #>
 [CmdletBinding()]
 param(
@@ -57,7 +64,8 @@ param(
     [switch]$Deploy,
     [string]$DeployDir = 'dist',
     [switch]$Run,
-    [string]$Open = 'org.qtplugins.mustardmayo'
+    [string]$Open = 'org.qtplugins.mustardmayo',
+    [switch]$Software
 )
 
 $ErrorActionPreference = 'Stop'
@@ -164,6 +172,14 @@ Invoke-Native cmake @('-S', $RepoRoot, '-B', $Build, '-G', 'Ninja',
 
 Write-Step 'Building'
 Invoke-Native cmake @('--build', $Build)
+
+# Qt Quick renders through Direct3D 11 on Windows, which is part of the OS. These variables pin
+# that backend and make it use WARP, the software rasterizer that ships with Windows.
+if ($Software) {
+    Write-Step 'Using Direct3D 11 software rendering (WARP)'
+    $env:QSG_RHI_BACKEND = 'd3d11'
+    $env:QSG_RHI_PREFER_SOFTWARE_RENDERER = '1'
+}
 
 if ($Test) {
     Write-Step 'Testing'

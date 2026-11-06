@@ -36,6 +36,7 @@ From any PowerShell prompt (no Developer prompt needed):
 scripts\build-windows.ps1 -Test                 # configure, build, run the tests
 scripts\build-windows.ps1 -Test -Deploy -Run    # ...then deploy to dist\ and launch the game
 scripts\build-windows.ps1 -QtDir D:\Qt\6.5.3\msvc2019_64 -Config Debug -Clean
+scripts\build-windows.ps1 -Test -Run -Software # software rendering (VMs, no GPU driver)
 Get-Help scripts\build-windows.ps1 -Detailed    # all options
 ```
 
@@ -78,6 +79,35 @@ From the build tree, Qt's DLLs must be on `PATH`:
 set PATH=C:\Qt\6.5.3\msvc2019_64\bin;%PATH%
 build\host\qtplugins-host.exe --extensions-dir build\extensions --open org.qtplugins.mustardmayo
 ```
+
+## Graphics: no Vulkan or OpenGL needed
+
+On Windows, Qt Quick and Qt Quick 3D render through **Direct3D 11**, which is part of Windows.
+Neither building nor running needs the Vulkan SDK, Vulkan runtime, or the Microsoft Store
+"OpenCL, OpenGL, and Vulkan Compatibility Pack".
+
+- CMake prints `Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR)` while configuring.
+  This is only a notice: Qt checks for optional Vulkan headers. The build doesn't use them, and CI
+  builds without them.
+- Shaders (`blur.frag`) are compiled by Qt's own `qsb` tool, which has its shader compilers built
+  in. It doesn't need a Vulkan or DirectX SDK.
+
+**Software rendering.** If the machine has no working GPU driver (a VM, a remote desktop session,
+or Windows on ARM under emulation), use WARP, Direct3D 11's software rasterizer. It also ships with
+Windows:
+
+```bat
+set QSG_RHI_BACKEND=d3d11
+set QSG_RHI_PREFER_SOFTWARE_RENDERER=1
+build\host\qtplugins-host.exe --extensions-dir build\extensions
+```
+
+`scripts\build-windows.ps1 -Software` sets these for `-Test` and `-Run`. They work the same for
+the deployed `dist\bin\qtplugins-host.exe`. WARP is slower than a GPU but handles both games.
+CI runs every test this way.
+
+To see which backend and adapter Qt picked, set `QSG_INFO=1` and `QT_LOGGING_TO_CONSOLE=1`, then run
+the host from a console.
 
 ## 4. Deploy
 

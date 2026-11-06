@@ -24,10 +24,8 @@ jobs:
       # The build script finds VS's MSVC 2019 (v142) toolset itself, so this also tests the script.
       - name: Build, test and deploy (scripts/build-windows.ps1)
         shell: pwsh
-        env:
-          # No GPU on the runner: render through Direct3D's WARP software rasterizer.
-          QSG_RHI_PREFER_SOFTWARE_RENDERER: '1'
-        run: ./scripts/build-windows.ps1 -QtDir $env:QT_ROOT_DIR -Test -Deploy
+        # No GPU on the runner: -Software renders through Direct3D's WARP software rasterizer.
+        run: ./scripts/build-windows.ps1 -QtDir $env:QT_ROOT_DIR -Test -Deploy -Software
 
       - name: Same script under Windows PowerShell 5.1 (configure + build only)
         shell: powershell
