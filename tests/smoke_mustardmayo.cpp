@@ -30,8 +30,10 @@ class SmokeMustardMayo : public QObject
 
     void tire()
     {
-        while (!m_typing->property("unreadable").toBool())
-            QMetaObject::invokeMethod(m_typing, "typeText", Q_ARG(QString, "x"));
+        while (!m_typing->property("unreadable").toBool()) {
+            const bool email = m_typing->property("emailOpen").toBool();
+            QMetaObject::invokeMethod(m_typing, "typeText", Q_ARG(QString, email ? "\r" : "x"));
+        }
     }
 
     void invoke(const char *method)
@@ -98,10 +100,27 @@ private slots:
     {
         QCOMPARE(phase(), QStringLiteral("work"));
         settle();
+        QObject *popup = m_view->rootObject()->findChild<QObject *>("emailPopup");
+        QVERIFY(popup);
         typeKeys("bool pref");
         QCOMPARE(m_typing->property("typedLength").toInt(), 9);
-        typeKeys("Q"); // typo
+        QVERIFY(!popup->property("visible").toBool());
+        const qreal alertness = 1 - m_typing->property("fatigue").toReal();
+
+        // The tenth keystroke (a typo) brings an email that costs a fifth of the night...
+        typeKeys("Q");
         QCOMPARE(m_typing->property("typos").toInt(), 1);
+        QTRY_VERIFY(popup->property("visible").toBool());
+        QVERIFY(1 - m_typing->property("fatigue").toReal() < alertness - 0.2);
+        typeKeys("light"); // ...and blocks typing...
+        QCOMPARE(m_typing->property("typedLength").toInt(), 9);
+        settle(400);
+        expectRendered("mm-work-email");
+        QTest::keyClick(m_view, Qt::Key_Return); // ...until Enter
+        QVERIFY(!m_typing->property("emailOpen").toBool());
+        typeKeys("light");
+        QCOMPARE(m_typing->property("typedLength").toInt(), 14);
+        QTRY_VERIFY(!popup->property("visible").toBool());
         settle(300);
         expectRendered("mm-work");
 

@@ -7,9 +7,12 @@
 
 namespace {
 
-// Types the next expected character, the way a key press would deliver it.
+// Types the next expected character, the way a key press would deliver it, first dismissing any
+// email with Enter.
 bool typeNext(TypingSession &typing)
 {
+    if (typing.isEmailOpen())
+        typing.typeText(QStringLiteral("\r"));
     const QChar c = typing.code().at(typing.typedLength());
     return typing.typeText(c == u'\n' ? QStringLiteral("\r") : QString(c));
 }
@@ -86,34 +89,100 @@ private slots:
         QCOMPARE(code.mid(typing.typedLength(), 6), QStringLiteral("return"));
     }
 
-    void typingFinishingTheCodeEndsTheNight()
+    void typingEmailsEndTheNightEarly()
     {
         TypingSession typing;
+        QSignalSpy emails(&typing, &TypingSession::emailChanged);
         qreal last = 0;
         while (!typing.isUnreadable()) {
             QVERIFY(typeNext(typing));
             QVERIFY(typing.fatigue() >= last);
             last = typing.fatigue();
         }
-        // A clean run stays readable to the very last character.
-        QCOMPARE(typing.typedLength(), int(typing.code().size()));
+        // A clean typist gets three emails, and the last one finishes them off mid-code.
+        QCOMPARE(typing.emailCount(), 3);
+        QVERIFY(typing.isEmailOpen());
+        QVERIFY(typing.typedLength() < typing.code().size());
         QCOMPARE(typing.fatigue(), 1.0);
     }
 
-    void typingStaysFreshForTheFirstLine()
+    void typingEmailArrivesAndCostsStamina()
     {
         TypingSession typing;
-        const int secondLine = typing.code().indexOf('\n') + 1;
-        while (typing.typedLength() < secondLine)
+        QSignalSpy emails(&typing, &TypingSession::emailChanged);
+        while (typing.keystrokes() < TypingSession::FirstEmailAt - 1)
             QVERIFY(typeNext(typing));
-        QVERIFY2(typing.fatigue() < 0.5, qPrintable(QString::number(typing.fatigue())));
+        QVERIFY(!typing.isEmailOpen());
+        const qreal before = typing.fatigue();
+
+        QVERIFY(typeNext(typing));
+        QVERIFY(typing.isEmailOpen());
+        QCOMPARE(emails.count(), 1);
+        QVERIFY(TypingSession::emailSubjects().contains(typing.emailSubject()));
+        QVERIFY(!typing.emailBody().isEmpty());
+        // One keystroke of fatigue plus a fifth of the night's stamina.
+        QVERIFY2(typing.fatigue() - before > TypingSession::EmailCost,
+                 qPrintable(QStringLiteral("%1 -> %2").arg(before).arg(typing.fatigue())));
+    }
+
+    void typingEmailBlocksUntilEnter()
+    {
+        TypingSession typing;
+        while (!typing.isEmailOpen())
+            QVERIFY(typeNext(typing));
+        const int typed = typing.typedLength();
+        const int keystrokes = typing.keystrokes();
+        const QChar next = typing.code().at(typed);
+
+        // Even the right key does nothing, and doesn't tire you, while the email is up.
+        QVERIFY(!typing.typeText(QString(next)));
+        QVERIFY(!typing.typeText("x"));
+        QCOMPARE(typing.typedLength(), typed);
+        QCOMPARE(typing.keystrokes(), keystrokes);
+        QCOMPARE(typing.typos(), 0);
+        QVERIFY(typing.isEmailOpen());
+
+        // Enter dismisses it without typing a newline.
+        QVERIFY(!typing.typeText("\r"));
+        QVERIFY(!typing.isEmailOpen());
+        QCOMPARE(typing.typedLength(), typed);
+        QCOMPARE(typing.keystrokes(), keystrokes);
+        QVERIFY(typing.typeText(QString(next)));
+    }
+
+    void typingEmailSubjects()
+    {
+        const QStringList subjects = TypingSession::emailSubjects();
+        for (const char *subject : {"IMS Replan", "IMS Replan Wall Walk", "BCN Notification",
+                                    "Urgent need 2028 BOE completed ASAP"})
+            QVERIFY2(subjects.contains(QLatin1String(subject)), subject);
+
+        // The emails in a night are all different.
+        TypingSession typing;
+        QStringList seen;
+        while (!typing.isUnreadable()) {
+            if (typing.isEmailOpen() && !seen.contains(typing.emailSubject()))
+                seen.append(typing.emailSubject());
+            QVERIFY(typeNext(typing));
+        }
+        if (typing.isEmailOpen() && !seen.contains(typing.emailSubject()))
+            seen.append(typing.emailSubject());
+        QCOMPARE(seen.size(), typing.emailCount());
+    }
+
+    void typingStaysFreshUntilTheFirstEmail()
+    {
+        TypingSession typing;
+        while (!typing.isEmailOpen())
+            QVERIFY(typeNext(typing));
+        QVERIFY2(typing.fatigue() < 0.4, qPrintable(QString::number(typing.fatigue())));
     }
 
     void typingMashingKeysAlsoTires()
     {
         TypingSession typing;
         for (int i = 0; i < 500 && !typing.isUnreadable(); ++i)
-            typing.typeText("q");
+            typing.typeText(typing.isEmailOpen() ? "\r" : "q");
         QVERIFY(typing.isUnreadable());
         QCOMPARE(typing.typedLength(), 0);
     }
@@ -125,6 +194,9 @@ private slots:
         typing.reset();
         QCOMPARE(typing.typedLength(), 0);
         QCOMPARE(typing.keystrokes(), 0);
+        QCOMPARE(typing.fatigue(), 0.0);
+        QCOMPARE(typing.emailCount(), 0);
+        QVERIFY(!typing.isEmailOpen());
         QVERIFY(!typing.isUnreadable());
     }
 

@@ -333,9 +333,98 @@ Item {
     }
     OverlayButton {
         anchors.centerIn: parent
-        visible: scene.typing.unreadable
+        visible: scene.typing.unreadable && !scene.typing.emailOpen
         text: qsTr("Go home")
         accent: "#2f7d32"
         onClicked: game.goHome()
+    }
+
+    // An email from the manager, demanding attention until Enter is pressed. Crisp, because it's
+    // outside the blurred world: you can always read the email, just not your code.
+    Rectangle {
+        id: emailPopup
+        objectName: "emailPopup"
+        readonly property bool shown: scene.typing.emailOpen
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: shown ? 0 : 30
+        Behavior on anchors.verticalCenterOffset { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        opacity: shown ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+
+        width: Math.min(560, scene.width * 0.8)
+        height: emailColumn.implicitHeight
+        radius: 8
+        color: "#f7f8fa"
+        border.color: "#9aa3b2"
+
+        Column {
+            id: emailColumn
+            width: parent.width
+
+            Rectangle { // window title bar
+                width: parent.width
+                height: 34
+                radius: 8
+                color: "#0a64d8"
+                Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 8; color: parent.color }
+                Text {
+                    anchors { left: parent.left; leftMargin: 14; verticalCenter: parent.verticalCenter }
+                    text: qsTr("New message — Inbox (%1 unread)").arg(212 + scene.typing.emailCount * 7)
+                    color: "white"
+                    font { pixelSize: 14; bold: true }
+                }
+                Rectangle { // importance flag
+                    anchors { right: parent.right; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                    width: 22; height: 22; radius: 11
+                    color: "#e8322a"
+                    Text { anchors.centerIn: parent; text: "!"; color: "white"; font { pixelSize: 15; bold: true } }
+                }
+            }
+            Column {
+                x: 18
+                width: parent.width - 36
+                topPadding: 14
+                bottomPadding: 16
+                spacing: 6
+                Text {
+                    text: qsTr("From: Program Manager")
+                    color: "#5a6372"
+                    font.pixelSize: 14
+                }
+                Text {
+                    width: parent.width
+                    text: scene.typing.emailSubject
+                    color: "#1b1f27"
+                    font { pixelSize: 20; bold: true }
+                    wrapMode: Text.Wrap
+                }
+                Rectangle { width: parent.width; height: 1; color: "#d5dae2" }
+                Text {
+                    width: parent.width
+                    topPadding: 4
+                    text: scene.typing.emailBody
+                    color: "#1b1f27"
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    lineHeight: 1.15
+                }
+                Item { width: 1; height: 8 }
+                Rectangle { // the only way out
+                    anchors.right: parent.right
+                    width: okText.implicitWidth + 32
+                    height: 34
+                    radius: 5
+                    color: "#0a64d8"
+                    Text {
+                        id: okText
+                        anchors.centerIn: parent
+                        text: qsTr("Acknowledge  ⏎ Enter")
+                        color: "white"
+                        font { pixelSize: 15; bold: true }
+                    }
+                }
+            }
+        }
     }
 }
